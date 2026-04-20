@@ -1,7 +1,10 @@
 package com.example.simon
 
+import android.content.res.Configuration
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,6 +14,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
@@ -23,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -45,26 +51,21 @@ fun Screen1(
 
     var sequence by remember { mutableStateOf(listOf<String>()) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
 
-        Spacer(modifier = Modifier.height(16.dp))
+    val grid = @Composable {
 
         Column(
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.fillMaxSize()
         ) {
             for (row in 0 until 3) {
                 Row(
-                    modifier = Modifier.weight(3f)
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
                 ) {
                     for (col in 0 until 2) {
-                        val index = row * 3 + col
-
+                        val index = row * 2 + col
                         Button(
-
                             onClick = {
                                 sequence = sequence + colorsL[index]
                             },
@@ -74,10 +75,9 @@ fun Screen1(
                             ),
                             modifier = Modifier
                                 .weight(1f)
-                                .aspectRatio(1f) // bottoni quadrati
+                                .fillMaxHeight()
                                 .padding(4.dp),
                             shape = RectangleShape
-
                         ) {
                             Text(colorsL[index])
                         }
@@ -85,8 +85,9 @@ fun Screen1(
                 }
             }
         }
+    }
 
-        Spacer(modifier = Modifier.height(16.dp))
+    val textBox = @Composable {
         Text(
             text = sequence.joinToString(", "),
             modifier = Modifier
@@ -95,27 +96,84 @@ fun Screen1(
                 .border(1.dp, Color.Gray)
                 .padding(8.dp)
         )
-        Spacer(modifier = Modifier.height(16.dp))
+    }
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
+    val bottonDelete = @Composable {
+        Button(onClick = {
+            // Cancella
+            sequence = emptyList()
+        }) {
+            Text("Cancella")
+        }
+    }
+
+    val bottonEndGame = @Composable {
+        Button(onClick = {
+            // Fine partita
+            val finalSequence = sequence
+            sequence = emptyList()
+            onGameFinished(finalSequence)
+        }) {
+            Text("Fine partita")
+        }
+    }
+
+    val isPortrait = LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT
+    if (isPortrait) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
         ) {
 
-            Button(onClick = {
-                // Cancella
-                sequence = emptyList()
-            }) {
-                Text("Cancella")
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                grid()
             }
 
-            Button(onClick = {
-                // Fine partita
-                val finalSequence = sequence
-                sequence = emptyList()
-                onGameFinished(finalSequence)
-            }) {
-                Text("Fine partita")
+            Spacer(modifier = Modifier.height(16.dp))
+            textBox()
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                bottonDelete()
+                bottonEndGame()
+            }
+        }
+    } else {
+
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            Box(modifier = Modifier.weight(1.5f)) {
+                grid()
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight(),
+                verticalArrangement = Arrangement.Center,
+            ) {
+                textBox()
+                Spacer(modifier = Modifier.height(16.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                ) {
+                    bottonDelete()
+                    bottonEndGame()
+                }
             }
         }
     }
