@@ -19,31 +19,13 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun Screen2(
-    curListOfList: MutableList<List<String>>,
-    LastSequence: Boolean
+    curListOfList: MutableList<List<String>>
 ) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
-
-        if (LastSequence) {
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp)
-                        .border(1.dp, Color.Gray)
-                        .padding(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ){
-                Text(
-                    text = "PARTITA IN CORSO",
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-            }}
-        }
         items(curListOfList.reversed()) { sequence ->
 
             Row(
