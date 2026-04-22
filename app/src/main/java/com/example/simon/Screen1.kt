@@ -21,8 +21,10 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,7 +51,7 @@ fun Screen1(
 
     val colorsL = listOf("R", "G", "B", "M", "Y", "C")
 
-    var sequence by remember { mutableStateOf(listOf<String>()) }
+    var sequence = rememberSaveable { mutableStateListOf<String>() }
 
 
     val grid = @Composable {
@@ -67,7 +69,7 @@ fun Screen1(
                         val index = row * 2 + col
                         Button(
                             onClick = {
-                                sequence = sequence + colorsL[index]
+                                sequence.add(colorsL[index])
                             },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = colorsC[index],
@@ -101,7 +103,7 @@ fun Screen1(
     val bottonDelete = @Composable {
         Button(onClick = {
             // Cancella
-            sequence = emptyList()
+            sequence.clear()
         }) {
             Text("Cancella")
         }
@@ -110,9 +112,8 @@ fun Screen1(
     val bottonEndGame = @Composable {
         Button(onClick = {
             // Fine partita
-            val finalSequence = sequence
-            sequence = emptyList()
-            onGameFinished(finalSequence)
+            onGameFinished(sequence.toList())
+            sequence.clear()
         }) {
             Text("Fine partita")
         }

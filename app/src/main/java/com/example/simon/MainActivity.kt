@@ -27,7 +27,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             SimonTheme {
                 val navController = rememberNavController()
-                val temp = rememberSaveable { mutableStateListOf<List<String>>()}
+                val curListOfList = rememberSaveable { mutableStateListOf<List<String>>() }
+                var isLastEmpty = true
 
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     NavHost(
@@ -36,13 +37,17 @@ class MainActivity : ComponentActivity() {
                     ) {
                         composable("screen1") {
                             Screen1(
-                                onGameFinished = { curList ->
-                                    temp.add(curList)
-                                    navController.navigate("screen2") }
+                                onGameFinished = { passedList ->
+                                    if (passedList.isNotEmpty()) {
+                                        curListOfList.add(passedList)
+                                        isLastEmpty = false
+                                    } else isLastEmpty = true
+                                    navController.navigate("screen2")
+                                }
                             )
                         }
                         composable("screen2") {
-                            Screen2(temp.toList())
+                            Screen2(curListOfList, isLastEmpty)
                         }
                     }
                 }
