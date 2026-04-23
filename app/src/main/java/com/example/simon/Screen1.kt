@@ -1,6 +1,7 @@
 package com.example.simon
 
 import android.content.res.Configuration
+import android.provider.Settings.Global.getString
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -105,7 +106,7 @@ fun Screen1(
             // Cancella
             sequence.clear()
         }) {
-            Text("Cancella")
+            Text(stringResource(R.string.cancella))
         }
     }
 
@@ -115,7 +116,7 @@ fun Screen1(
             onGameFinished(sequence.toList())
             sequence.clear()
         }) {
-            Text("Fine partita")
+            Text(stringResource(R.string.fine_partita))
         }
     }
 
