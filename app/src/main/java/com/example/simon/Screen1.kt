@@ -1,22 +1,18 @@
 package com.example.simon
 
 import android.content.res.Configuration
-import android.provider.Settings.Global.getString
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,13 +23,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -41,11 +32,8 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.delay
-import kotlin.concurrent.thread
 
 @Composable
 fun Screen1(
@@ -67,16 +55,17 @@ fun Screen1(
 
     var sequence = rememberSaveable { mutableStateListOf<String>() }
 
+    //GRID di BOTTONI (colori)
     val grid = @Composable {
         BoxWithConstraints {
             val buttonHeight = maxHeight/3
             val buttonWidth = maxWidth/2
 
             Column {
-                for (row in 0 until 3) {
+                for (row in 0 until 3) {    //3 righe
                     Row {
-                        for (col in 0 until 2) {
-                            val index = row * 2 + col
+                        for (col in 0 until 2) {    //2 colonne
+                            val index = row * 2 + col   //calcolo indice
 
                             Button(
                                 onClick = { sequence.add(colorsL[index]) },
@@ -103,6 +92,7 @@ fun Screen1(
         }
     }
 
+    //TEXTBOX che viene popolata dalla sequenza
     val textBox = @Composable {
         Box(
             modifier = Modifier
@@ -112,12 +102,13 @@ fun Screen1(
                 .padding(spacing)
         ) {
             Text(
-                text = if (sequence.isEmpty()) "-" else sequence.joinToString(", "),
+                text = if (sequence.isEmpty()) "-" else sequence.joinToString(", "), //se la sequenza è vuola uso "-" come placeholder
                 style = MaterialTheme.typography.bodyLarge
             )
         }
     }
 
+    //BUTTON per cancellare tutta la sequenza corrente
     val bottonDelete = @Composable {
         OutlinedButton(
             onClick = { sequence.clear() }
@@ -126,6 +117,7 @@ fun Screen1(
         }
     }
 
+    //BUTTON per salvare la sequenza e passare a Screen2
     val bottonEndGame = @Composable {
         Button(
             onClick = {
@@ -139,19 +131,20 @@ fun Screen1(
 
     val isPortrait = LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT
 
-    if (isPortrait) {
+    if (isPortrait) {   //PORTRAIT MODE
         BoxWithConstraints(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(spacing)
         ) {
             val screenHeight = maxHeight
-
+            //dedico 1/4 dello spazio al textBox ed ai due bottoni, i restanti 3/4 alla grid
             val bottomSectionHeight = screenHeight/4
             val gridSectionHeight = screenHeight*3/4
 
             Column(modifier = Modifier.fillMaxSize()) {
 
+                //GRID di bottoni (per aggiungere elementi alla sequenza)
                 Box(
                     modifier = Modifier
                         .height(gridSectionHeight)
@@ -162,6 +155,7 @@ fun Screen1(
 
                 Spacer(modifier = Modifier.height(spacing))
 
+                //area dedicata a textBox e bottoni in basso
                 Column(
                     modifier = Modifier
                         .height(bottomSectionHeight)
@@ -169,7 +163,7 @@ fun Screen1(
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
 
-                    // TEXT BOX con scroll se cresce troppo
+                    //TEXT BOX con scroll se cresce troppo
                     Box(
                         modifier = Modifier
                             .weight(1f)
@@ -180,6 +174,7 @@ fun Screen1(
 
                     Spacer(modifier = Modifier.height(spacing))
 
+                    //BUTTONS cancella e fine partita
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center
@@ -191,14 +186,14 @@ fun Screen1(
                 }
             }
         }
-    } else {
-
+    } else {    //LANDSCAPE MODE
         Row(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(spacing)
         ) {
 
+            //GRID di bottoni (per aggiungere elementi alla sequenza)
             Box(modifier = Modifier.weight(1.5f)) {
                 grid()
             }
@@ -212,10 +207,12 @@ fun Screen1(
                 verticalArrangement = Arrangement.Center
             ) {
 
+                //TEXT BOX con scroll se cresce troppo
                 textBox()
 
                 Spacer(modifier = Modifier.height(spacing))
 
+                //BUTTONS cancella e fine partita
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center

@@ -41,6 +41,7 @@ fun Screen2(
 
         Column(modifier = Modifier.padding(bottom = spacing)) {
 
+            //TITLE della pagina
             Text(
                 text = stringResource(R.string.recap_partite),
                 style = MaterialTheme.typography.headlineSmall.copy(
@@ -50,6 +51,7 @@ fun Screen2(
 
             Spacer(modifier = Modifier.height(smallSpacing))
 
+            //LINE per stile
             Box(
                 modifier = Modifier
                     .fillMaxWidth(0.15f)
@@ -68,12 +70,10 @@ fun Screen2(
             verticalArrangement = Arrangement.spacedBy(smallSpacing)
         ) {
 
-            items(curListOfList.reversed())
-
-
+            items(curListOfList.reversed()) //inverto la lista per ottenere l'ultima sequenza inserita in alto
 
             { sequence ->
-
+                //RECAP singola sequnza
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -83,6 +83,7 @@ fun Screen2(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
 
+                    //NUMBER di elementi per la singola sequnza in esame
                     Box(
                         modifier = Modifier
                             .clip(shape)
@@ -103,7 +104,9 @@ fun Screen2(
 
                     Spacer(modifier = Modifier.width(spacing))
 
+                    //SEQUENCE degli elementi
                     Text(
+                        //se non ho inserito elementi scrivo "successione vuota"
                         text = if (sequence.isEmpty()) stringResource(R.string.successione_vuota) else sequence.joinToString(", "),
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.weight(1f),

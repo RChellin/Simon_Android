@@ -10,12 +10,9 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -30,12 +27,16 @@ class MainActivity : ComponentActivity() {
         setContent {
             SimonTheme {
                 val navController = rememberNavController()
+                //tra uno Screen e l'altro passo una Lista di Liste di Stringhe
+                //ogni lista di Stringhe interna è una sequenza
                 val curListOfList = rememberSaveable { mutableStateListOf<List<String>>() }
 
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     NavHost(
-                        enterTransition = { fadeIn(animationSpec = tween(150)) },
-                        exitTransition = { fadeOut(animationSpec = tween(150)) },
+                        //queste due righe servono per limitare il tempo per le transazioni (pottoni e cambio Screen)
+                        enterTransition = { fadeIn(animationSpec = tween(100)) },
+                        exitTransition = { fadeOut(animationSpec = tween(100)) },
+
                         navController = navController, startDestination = "screen1",
                         modifier = Modifier.padding(innerPadding)
                     ) {
