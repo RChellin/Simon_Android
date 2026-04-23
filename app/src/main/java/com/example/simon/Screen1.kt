@@ -110,7 +110,7 @@ fun Screen1(
                 .padding(spacing)
         ) {
             Text(
-                text = if (sequence.isEmpty()) "—" else sequence.joinToString(" • "),
+                text = if (sequence.isEmpty()) "-" else sequence.joinToString(", "),
                 style = MaterialTheme.typography.bodyLarge
             )
         }
