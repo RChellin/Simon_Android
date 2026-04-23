@@ -3,4 +3,5 @@
     <string name="cancella">Cancella</string>
     <string name="fine_partita">Fine Partita</string>
     <string name="recap_partite">Recap delle partite</string>
+    <string name="successione_vuota">Successione vuota</string>
 </resources>

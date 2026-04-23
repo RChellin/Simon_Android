@@ -4,4 +4,6 @@
     <string name="cancella">Delate</string>
     <string name="fine_partita">End Game</string>
     <string name="recap_partite">Games recap</string>
+    <string name="successione_vuota">Empty series</string>
+
 </resources>

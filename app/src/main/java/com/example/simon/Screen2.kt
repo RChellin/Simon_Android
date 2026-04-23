@@ -33,76 +33,84 @@ fun Screen2(
     val smallSpacing = 6.dp
     val shape = RoundedCornerShape(12.dp)
 
-    LazyColumn(
+    Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(spacing),
-        verticalArrangement = Arrangement.spacedBy(smallSpacing)
+            .padding(spacing)
     ) {
 
-        item {
-            Column(modifier = Modifier.padding(bottom = spacing)) {
+        Column(modifier = Modifier.padding(bottom = spacing)) {
 
-                Text(
-                    text = stringResource(R.string.recap_partite),
-                    style = MaterialTheme.typography.headlineSmall.copy(
-                        fontWeight = FontWeight.Bold
+            Text(
+                text = stringResource(R.string.recap_partite),
+                style = MaterialTheme.typography.headlineSmall.copy(
+                    fontWeight = FontWeight.Bold
+                )
+            )
+
+            Spacer(modifier = Modifier.height(smallSpacing))
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.15f)
+                    .height(2.dp)
+                    .background(
+                        MaterialTheme.colorScheme.primary,
+                        RoundedCornerShape(percent = 50)
                     )
-                )
-
-                Spacer(modifier = Modifier.height(smallSpacing))
-
-                // linea sotto al titolo
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(0.15f)
-                        .height(2.dp)
-                        .background(
-                            MaterialTheme.colorScheme.primary,
-                            RoundedCornerShape(percent = 50)
-                        )
-                )
-            }
+            )
         }
 
-        items(curListOfList.reversed()) { sequence ->
+        LazyColumn(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(smallSpacing)
+        ) {
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(shape)
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .padding(spacing),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            items(curListOfList.reversed())
 
-                Box(
+
+
+            { sequence ->
+
+                Row(
                     modifier = Modifier
+                        .fillMaxWidth()
                         .clip(shape)
-                        .background(MaterialTheme.colorScheme.primary)
-                        .padding(
-                            horizontal = spacing * 0.75f,
-                            vertical = smallSpacing
-                        )
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .padding(spacing),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = sequence.size.toString(),
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        style = MaterialTheme.typography.labelLarge.copy(
-                            fontWeight = FontWeight.Bold
+
+                    Box(
+                        modifier = Modifier
+                            .clip(shape)
+                            .background(MaterialTheme.colorScheme.primary)
+                            .padding(
+                                horizontal = spacing * 0.75f,
+                                vertical = smallSpacing
+                            )
+                    ) {
+                        Text(
+                            text = sequence.size.toString(),
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            style = MaterialTheme.typography.labelLarge.copy(
+                                fontWeight = FontWeight.Bold
+                            )
                         )
+                    }
+
+                    Spacer(modifier = Modifier.width(spacing))
+
+                    Text(
+                        text = if (sequence.isEmpty()) stringResource(R.string.successione_vuota) else sequence.joinToString(", "),
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.weight(1f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
-
-                Spacer(modifier = Modifier.width(spacing))
-
-                Text(
-                    text = sequence.joinToString(", "),
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.weight(1f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
             }
         }
     }
