@@ -1,5 +1,6 @@
 package com.example.simon
 
+import android.R.attr.maxHeight
 import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -23,8 +25,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -131,6 +135,12 @@ fun Screen1(
 
     val isPortrait = LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT
 
+    //necessario per scroll automatico
+    val scrollState = rememberScrollState()
+    LaunchedEffect(sequence.size) {
+        scrollState.animateScrollTo(scrollState.maxValue)
+    }
+
     if (isPortrait) {   //PORTRAIT MODE
         BoxWithConstraints(
             modifier = Modifier
@@ -167,7 +177,7 @@ fun Screen1(
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .verticalScroll(rememberScrollState())
+                            .verticalScroll(scrollState)
                     ) {
                         textBox()
                     }
@@ -200,6 +210,7 @@ fun Screen1(
 
             Spacer(modifier = Modifier.width(spacing))
 
+            //area dedicata a textBox e bottoni in basso
             Column(
                 modifier = Modifier
                     .weight(1.2f)
@@ -207,19 +218,35 @@ fun Screen1(
                 verticalArrangement = Arrangement.Center
             ) {
 
-                //TEXT BOX con scroll se cresce troppo
-                textBox()
-
-                Spacer(modifier = Modifier.height(spacing))
-
-                //BUTTONS cancella e fine partita
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    bottonDelete()
-                    Spacer(modifier = Modifier.width(spacing))
-                    bottonEndGame()
+
+                    //TEXT BOX con scroll se cresce troppo
+
+                    BoxWithConstraints {
+
+                        val maxTextHeight = maxHeight * (2f / 3f)
+
+                        Box(
+                            modifier = Modifier
+                                .heightIn(max = maxTextHeight)
+                                .verticalScroll(scrollState)
+                        ) {
+                            textBox()
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(spacing))
+
+                    //BUTTONS cancella e fine partita
+                    Row(
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        bottonDelete()
+                        Spacer(modifier = Modifier.width(spacing))
+                        bottonEndGame()
+                    }
                 }
             }
         }
