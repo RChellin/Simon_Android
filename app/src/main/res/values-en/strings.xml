@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Simon</string>
-    <string name="cancella">Delate</string>
+    <string name="cancella">Delete</string>
     <string name="fine_partita">End Game</string>
     <string name="recap_partite">Games recap</string>
     <string name="successione_vuota">Empty series</string>
