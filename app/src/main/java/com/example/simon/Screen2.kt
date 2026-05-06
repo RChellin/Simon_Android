@@ -1,6 +1,7 @@
 package com.example.simon
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,7 +28,8 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun Screen2(
-    curListOfList: MutableList<List<String>>
+    curListOfList: MutableList<List<String>>,
+    onAskDetail: (List<String>) -> Unit
 ) {
     val spacing = 12.dp
     val smallSpacing = 6.dp
@@ -79,7 +81,10 @@ fun Screen2(
                         .fillMaxWidth()
                         .clip(shape)
                         .background(MaterialTheme.colorScheme.surfaceVariant)
-                        .padding(spacing),
+                        .padding(spacing)
+                        .clickable(
+                            onClick = { onAskDetail(sequence) }
+                        ),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
 

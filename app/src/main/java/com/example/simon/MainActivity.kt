@@ -31,6 +31,7 @@ class MainActivity : ComponentActivity() {
                 //tra uno Screen e l'altro passo una Lista di Liste di Stringhe
                 //ogni lista di Stringhe interna è una sequenza
                 val curListOfList = rememberSaveable { mutableStateListOf<List<String>>() }
+                val curList = rememberSaveable {mutableStateListOf<String>() }
 
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     NavHost(
@@ -50,7 +51,16 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable("screen2") {
-                            Screen2(curListOfList)
+                            Screen2(curListOfList,
+                                onAskDetail={
+                                    passedList ->
+                                    curList.clear()
+                                    curList.addAll(passedList)
+                                    navController.navigate("screen3")
+                                })
+                        }
+                        composable("screen3") {
+                            Screen3(curList)
                         }
                     }
                 }

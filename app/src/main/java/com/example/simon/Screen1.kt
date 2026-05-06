@@ -26,8 +26,11 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -58,12 +61,13 @@ fun Screen1(
     val colorsL = listOf("R", "G", "B", "M", "Y", "C")
 
     var sequence = rememberSaveable { mutableStateListOf<String>() }
+    var isPaused by rememberSaveable { mutableStateOf(false) }
 
     //GRID di BOTTONI (colori)
     val grid = @Composable {
         BoxWithConstraints {
-            val buttonHeight = maxHeight/3
-            val buttonWidth = maxWidth/2
+            val buttonHeight = maxHeight / 3
+            val buttonWidth = maxWidth / 2
 
             Column {
                 for (row in 0 until 3) {    //3 righe
@@ -72,7 +76,9 @@ fun Screen1(
                             val index = row * 2 + col   //calcolo indice
 
                             Button(
-                                onClick = { sequence.add(colorsL[index]) },
+                                onClick = {
+                                    if (!isPaused) sequence.add(colorsL[index])
+                                },
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = colorsC[index],
                                     contentColor = Color.Black
@@ -81,7 +87,8 @@ fun Screen1(
                                 modifier = Modifier
                                     .width(buttonWidth)
                                     .height(buttonHeight)
-                                    .padding(smallSpacing)
+                                    .padding(smallSpacing),
+                                enabled = !isPaused,
                             ) {
                                 Text(
                                     colorsL[index],
@@ -133,6 +140,17 @@ fun Screen1(
         }
     }
 
+    //BUTTON per mettere il gioco in pausa e riprenderlo
+    val buttonPauseResume = @Composable {
+        Button(
+            onClick = {
+                isPaused = !isPaused
+            }
+        ) {
+            Text(if (isPaused) stringResource(R.string.riprendi) else stringResource(R.string.pausa))
+        }
+    }
+
     val isPortrait = LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT
 
     //necessario per scroll automatico
@@ -149,8 +167,8 @@ fun Screen1(
         ) {
             val screenHeight = maxHeight
             //dedico 1/4 dello spazio al textBox ed ai due bottoni, i restanti 3/4 alla grid
-            val bottomSectionHeight = screenHeight/4
-            val gridSectionHeight = screenHeight*3/4
+            val bottomSectionHeight = screenHeight / 4
+            val gridSectionHeight = screenHeight * 3 / 4
 
             Column(modifier = Modifier.fillMaxSize()) {
 
@@ -192,6 +210,8 @@ fun Screen1(
                         bottonDelete()
                         Spacer(modifier = Modifier.width(spacing))
                         bottonEndGame()
+                        Spacer(modifier = Modifier.width(spacing))
+                        buttonPauseResume()
                     }
                 }
             }
@@ -215,38 +235,40 @@ fun Screen1(
                 modifier = Modifier
                     .weight(1.2f)
                     .fillMaxHeight(),
-                verticalArrangement = Arrangement.Center
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
+                //TEXT BOX con scroll se cresce troppo
 
-                    //TEXT BOX con scroll se cresce troppo
+                BoxWithConstraints {
 
-                    BoxWithConstraints {
+                    val maxTextHeight = maxHeight * (2f / 3f)
 
-                        val maxTextHeight = maxHeight * (2f / 3f)
-
-                        Box(
-                            modifier = Modifier
-                                .heightIn(max = maxTextHeight)
-                                .verticalScroll(scrollState)
-                        ) {
-                            textBox()
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(spacing))
-
-                    //BUTTONS cancella e fine partita
-                    Row(
-                        horizontalArrangement = Arrangement.Center
+                    Box(
+                        modifier = Modifier
+                            .heightIn(max = maxTextHeight)
+                            .verticalScroll(scrollState)
                     ) {
-                        bottonDelete()
-                        Spacer(modifier = Modifier.width(spacing))
-                        bottonEndGame()
+                        textBox()
                     }
+                }
+
+                Spacer(modifier = Modifier.height(spacing))
+
+                //BUTTONS cancella e fine partita
+                Row(
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    bottonDelete()
+                    Spacer(modifier = Modifier.width(spacing))
+                    bottonEndGame()
+                }
+                Spacer(modifier = Modifier.height(spacing))
+                Row(
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    buttonPauseResume()
                 }
             }
         }
