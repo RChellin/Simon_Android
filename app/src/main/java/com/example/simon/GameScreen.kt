@@ -1,6 +1,5 @@
 package com.example.simon
 
-import android.R.attr.maxHeight
 import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -265,6 +264,8 @@ fun Screen1(
                     bottonEndGame()
                 }
                 Spacer(modifier = Modifier.height(spacing))
+
+                //BUTTON pausa e ricomincia
                 Row(
                     horizontalArrangement = Arrangement.Center
                 ) {

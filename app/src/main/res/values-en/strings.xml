@@ -7,4 +7,5 @@
     <string name="successione_vuota">Empty series</string>
     <string name="pausa">Pause</string>
     <string name="riprendi">Resume</string>
+    <string name="gioca">Play</string>
 </resources>
