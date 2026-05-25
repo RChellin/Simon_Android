@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import kotlin.collections.joinToString
 
 @Composable
-fun Screen3(
+fun DetailScreen(
     curList: MutableList<String>
 ) {
     val spacing = 12.dp

@@ -1,5 +1,8 @@
 package com.example.simon
 
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.activity.compose.BackHandler
+
 import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -21,15 +24,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,8 +39,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun Screen1(
-    onGameFinished: (List<String>) -> Unit
+fun GameScreen(
+    onGameFinished: (List<String>) -> Unit,
+    viewModel: GameViewModel = viewModel()
 ) {
     val spacing = 12.dp
     val smallSpacing = 6.dp
@@ -58,9 +56,11 @@ fun Screen1(
     )
 
     val colorsL = listOf("R", "G", "B", "M", "Y", "C")
+    viewModel.onGameFinished = onGameFinished
 
-    var sequence = rememberSaveable { mutableStateListOf<String>() }
-    var isPaused by rememberSaveable { mutableStateOf(false) }
+    BackHandler {
+        viewModel.onBackPressed()
+    }
 
     //GRID di BOTTONI (colori)
     val grid = @Composable {
@@ -76,18 +76,30 @@ fun Screen1(
 
                             Button(
                                 onClick = {
-                                    if (!isPaused) sequence.add(colorsL[index])
+                                    viewModel.onColorPressed(colorsL[index])
                                 },
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = colorsC[index],
-                                    contentColor = Color.Black
+                                    containerColor =
+                                        if (viewModel.activeColor == colorsL[index])
+                                            colorsC[index]
+                                        else
+                                            colorsC[index].copy(alpha = 0.35f),
+
+                                    disabledContainerColor =
+                                        if (viewModel.activeColor == colorsL[index])
+                                            colorsC[index]
+                                        else
+                                            colorsC[index].copy(alpha = 0.35f),
+
+                                    contentColor = Color.Black,
+                                    disabledContentColor = Color.Black
                                 ),
                                 shape = RectangleShape,
                                 modifier = Modifier
                                     .width(buttonWidth)
                                     .height(buttonHeight)
                                     .padding(smallSpacing),
-                                enabled = !isPaused,
+                                enabled = viewModel.isColorButtonsEnabled(),
                             ) {
                                 Text(
                                     colorsL[index],
@@ -112,18 +124,20 @@ fun Screen1(
                 .padding(spacing)
         ) {
             Text(
-                text = if (sequence.isEmpty()) "-" else sequence.joinToString(", "), //se la sequenza è vuola uso "-" come placeholder
+                text = viewModel.textAreaContent(), //se la sequenza è vuola uso "-" come placeholder
                 style = MaterialTheme.typography.bodyLarge
             )
         }
     }
+    val buttonStartGame = @Composable {
 
-    //BUTTON per cancellare tutta la sequenza corrente
-    val bottonDelete = @Composable {
-        OutlinedButton(
-            onClick = { sequence.clear() }
+        Button(
+            onClick = {
+                viewModel.startGame()
+            },
+            enabled = viewModel.isStartEnabled()
         ) {
-            Text(stringResource(R.string.cancella))
+            Text("Avvia partita")
         }
     }
 
@@ -131,9 +145,9 @@ fun Screen1(
     val bottonEndGame = @Composable {
         Button(
             onClick = {
-                onGameFinished(sequence.toList())
-                sequence.clear()
-            }
+                viewModel.endGame()
+            },
+            enabled = viewModel.isEndGameEnabled()
         ) {
             Text(stringResource(R.string.fine_partita))
         }
@@ -141,20 +155,35 @@ fun Screen1(
 
     //BUTTON per mettere il gioco in pausa e riprenderlo
     val buttonPauseResume = @Composable {
-        Button(
-            onClick = {
-                isPaused = !isPaused
+            Button(
+                onClick = {
+                    viewModel.togglePause()
+                },
+                enabled = viewModel.isPauseEnabled()
+            ) {
+                Text(viewModel.pauseButtonText())
             }
-        ) {
-            Text(if (isPaused) stringResource(R.string.riprendi) else stringResource(R.string.pausa))
+
+    }
+    @Composable
+    fun ErrorMessage(errorMessage: String?) {
+
+        errorMessage?.let {
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = it,
+                color = Color.Red,
+                fontWeight = FontWeight.Bold
+            )
         }
     }
-
     val isPortrait = LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT
 
     //necessario per scroll automatico
     val scrollState = rememberScrollState()
-    LaunchedEffect(sequence.size) {
+    LaunchedEffect(viewModel.playerInput.size) {
         scrollState.animateScrollTo(scrollState.maxValue)
     }
 
@@ -198,7 +227,7 @@ fun Screen1(
                     ) {
                         textBox()
                     }
-
+                    ErrorMessage(viewModel.errorMessage)
                     Spacer(modifier = Modifier.height(spacing))
 
                     //BUTTONS cancella e fine partita
@@ -206,7 +235,7 @@ fun Screen1(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center
                     ) {
-                        bottonDelete()
+                        buttonStartGame()
                         Spacer(modifier = Modifier.width(spacing))
                         bottonEndGame()
                         Spacer(modifier = Modifier.width(spacing))
@@ -252,6 +281,7 @@ fun Screen1(
                         textBox()
                     }
                 }
+                ErrorMessage(viewModel.errorMessage)
 
                 Spacer(modifier = Modifier.height(spacing))
 
@@ -259,7 +289,7 @@ fun Screen1(
                 Row(
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    bottonDelete()
+                    buttonStartGame()
                     Spacer(modifier = Modifier.width(spacing))
                     bottonEndGame()
                 }

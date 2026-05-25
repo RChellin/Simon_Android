@@ -39,28 +39,36 @@ class MainActivity : ComponentActivity() {
                         enterTransition = { fadeIn(animationSpec = tween(100)) },
                         exitTransition = { fadeOut(animationSpec = tween(100)) },
 
-                        navController = navController, startDestination = "screen1",
+                        navController = navController, startDestination = "GameListScreen",
                         modifier = Modifier.padding(innerPadding)
                     ) {
-                        composable("screen1") {
-                            Screen1(
+                        composable("GameScreen") {
+                            GameScreen(
                                 onGameFinished = { passedList ->
-                                    curListOfList.add(passedList)
-                                    navController.navigate("screen2")
+
+                                    if (passedList.isNotEmpty()) {
+                                        curListOfList.add(passedList)
+                                    }
+
+                                    navController.navigate("GameListScreen")
                                 }
                             )
                         }
-                        composable("screen2") {
-                            Screen2(curListOfList,
+                        composable("GameListScreen") {
+                            GameListScreen(curListOfList,
                                 onAskDetail={
                                     passedList ->
                                     curList.clear()
                                     curList.addAll(passedList)
-                                    navController.navigate("screen3")
-                                })
+                                    navController.navigate("DetailScreen")
+                                },
+                                onPlay={
+                                    navController.navigate("GameScreen")
+                                }
+                            )
                         }
-                        composable("screen3") {
-                            Screen3(curList)
+                        composable("DetailScreen") {
+                            DetailScreen(curList)
                         }
                     }
                 }

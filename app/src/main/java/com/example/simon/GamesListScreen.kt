@@ -34,9 +34,10 @@ import androidx.compose.ui.unit.dp
 
 
 @Composable
-fun Screen2(
+fun GameListScreen(
     curListOfList: MutableList<List<String>>,
-    onAskDetail: (List<String>) -> Unit
+    onAskDetail: (List<String>) -> Unit,
+    onPlay: () -> Unit
 ) {
     val spacing = 12.dp
     val smallSpacing = 6.dp
@@ -72,71 +73,92 @@ fun Screen2(
             )
         }
 
-        BoxWithConstraints() {
+        BoxWithConstraints(
+            modifier = Modifier.weight(1f)
+        ) {
+
             val maxTextHeight = maxHeight * (5f / 6f)
 
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(max = maxTextHeight),
-                verticalArrangement = Arrangement.spacedBy(smallSpacing)
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
 
-                items(curListOfList.reversed()) //inverto la lista per ottenere l'ultima sequenza inserita in alto
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = maxTextHeight),
+                    verticalArrangement = Arrangement.spacedBy(smallSpacing)
+                ) {
 
-                { sequence ->
-                    //RECAP singola sequnza
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(shape)
-                            .background(MaterialTheme.colorScheme.surfaceVariant)
-                            .padding(spacing)
-                            .clickable(
-                                onClick = { onAskDetail(sequence) }
-                            ),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
+                    items(curListOfList.reversed()) { sequence ->
 
-                        //NUMBER di elementi per la singola sequnza in esame
-                        Box(
+                        //RECAP singola sequenza
+                        Row(
                             modifier = Modifier
+                                .fillMaxWidth()
                                 .clip(shape)
-                                .background(MaterialTheme.colorScheme.primary)
-                                .padding(
-                                    horizontal = spacing * 0.75f,
-                                    vertical = smallSpacing
-                                )
+                                .background(MaterialTheme.colorScheme.surfaceVariant)
+                                .padding(spacing)
+                                .clickable(
+                                    onClick = { onAskDetail(sequence) }
+                                ),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(
-                                text = sequence.size.toString(),
-                                color = MaterialTheme.colorScheme.onPrimary,
-                                style = MaterialTheme.typography.labelLarge.copy(
-                                    fontWeight = FontWeight.Bold
+
+                            //NUMBER elementi
+                            Box(
+                                modifier = Modifier
+                                    .clip(shape)
+                                    .background(MaterialTheme.colorScheme.primary)
+                                    .padding(
+                                        horizontal = spacing * 0.75f,
+                                        vertical = smallSpacing
+                                    )
+                            ) {
+                                Text(
+                                    text = sequence.size.toString(),
+                                    color = MaterialTheme.colorScheme.onPrimary,
+                                    style = MaterialTheme.typography.labelLarge.copy(
+                                        fontWeight = FontWeight.Bold
+                                    )
                                 )
+                            }
+
+                            Spacer(modifier = Modifier.width(spacing))
+
+                            //SEQUENZA
+                            Text(
+                                text =
+                                    if (sequence.isEmpty())
+                                        stringResource(R.string.successione_vuota)
+                                    else
+                                        sequence.joinToString(", "),
+
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.weight(1f),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
-
-                        Spacer(modifier = Modifier.width(spacing))
-
-                        //SEQUENCE degli elementi
-                        Text(
-                            //se non ho inserito elementi scrivo "successione vuota"
-                            text = if (sequence.isEmpty()) stringResource(R.string.successione_vuota) else sequence.joinToString(
-                                ", "
-                            ),
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.weight(1f),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
                     }
-                    ExtendedFloatingActionButton(
-                        onClick = { },
-                        icon = { Icon(Icons.Filled.Gamepad, "Extended floating action button.") },
-                        text = { Text(text = stringResource(R.string.gioca)) },
-                    )
                 }
+
+                Spacer(modifier = Modifier.height(spacing))
+
+                ExtendedFloatingActionButton(
+                    onClick = { onPlay() },
+                    icon = {
+                        Icon(
+                            Icons.Filled.Gamepad,
+                            contentDescription = "Gioca"
+                        )
+                    },
+                    text = {
+                        Text(text = stringResource(R.string.gioca))
+                    },
+                    modifier = Modifier.align(Alignment.End)
+                )
             }
         }
     }
