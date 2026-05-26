@@ -28,19 +28,12 @@ class GameViewModel : ViewModel() {
     private val availableColors = listOf("R", "G", "B", "M", "Y", "C")
 
     private val _sequence = mutableStateListOf<String>()
-    val sequence: List<String> = _sequence
-
-    private val _playerInput = mutableStateListOf<String>()
-    val playerInput: List<String> = _playerInput
-
+    val playerInput = mutableStateListOf<String>()
     var gameState by mutableStateOf(GameState.IDLE)
-        private set
 
     var activeColor by mutableStateOf<String?>(null)
-        private set
 
     var errorMessage by mutableStateOf<String?>(null)
-        private set
 
     // indice corrente inserito dal giocatore
     private var currentPlayerIndex = 0
@@ -78,7 +71,7 @@ class GameViewModel : ViewModel() {
         computerJob = viewModelScope.launch {
 
             gameState = GameState.COMPUTER_TURN
-            _playerInput.clear()
+            playerInput.clear()
 
             for (color in _sequence) {
 
@@ -109,13 +102,13 @@ class GameViewModel : ViewModel() {
 
         if (gameState != GameState.PLAYER_TURN) return
 
-        _playerInput.add(color)
+        playerInput.add(color)
 
         // feedback visivo
         activeColor = color
 
         viewModelScope.launch {
-            delay(200)
+            delay(600)
             activeColor = null
         }
 
@@ -155,17 +148,13 @@ class GameViewModel : ViewModel() {
 
     fun togglePause() {
 
-        when (gameState) {
+        if (gameState == GameState.COMPUTER_TURN) {
+            gameState = GameState.PAUSED
+            return
+        }
 
-            GameState.COMPUTER_TURN -> {
-                gameState = GameState.PAUSED
-            }
-
-            GameState.PAUSED -> {
-                gameState = GameState.COMPUTER_TURN
-            }
-
-            else -> {}
+        if (gameState == GameState.PAUSED) {
+            gameState = GameState.COMPUTER_TURN
         }
     }
 
@@ -176,32 +165,34 @@ class GameViewModel : ViewModel() {
     fun endGame() {
 
         computerJob?.cancel()
+        activeColor = null
 
-        // se siamo ancora alla prima sequenza
-        // la partita non viene salvata
-        if (!firstRoundCompleted && _sequence.size == 1) {
-
+        // se è in corso la presentazione della prima sequenza la partita non viene salvata
+        if (_sequence.size == 1 && gameState == GameState.COMPUTER_TURN) {
             resetGame()
 
-            onGameFinished?.invoke(emptyList())
+            if (onGameFinished != null) {
+                onGameFinished!!(emptyList())
+            }
 
             return
         }
 
-        // comportamento equivalente a errore
         gameState = GameState.GAME_OVER
+        errorMessage = "Partita terminata"
 
-        val partialSequence = buildList {
+        val partialSequence = mutableListOf<String>()
 
-            addAll(_playerInput)
+        partialSequence.addAll(playerInput)
 
-            // se non ha ancora premuto nulla
-            if (_playerInput.isEmpty() && _sequence.isNotEmpty()) {
-                add("ERRORE")
-            }
+        // Se il giocatore non ha ancora premuto nulla, considero errore sul primo rettangolo
+        if (playerInput.isEmpty() && _sequence.isNotEmpty()) {
+            partialSequence.add("ERRORE")
         }
 
-        onGameFinished?.invoke(partialSequence)
+        if (onGameFinished != null) {
+            onGameFinished!!(playerInput)
+        }
     }
 
     // =========================
@@ -210,25 +201,23 @@ class GameViewModel : ViewModel() {
 
     fun onBackPressed() {
 
-        when (gameState) {
-
-            GameState.GAME_OVER -> {
-
-                onGameFinished?.invoke(_playerInput.toList())
+        if (gameState == GameState.GAME_OVER) {
+            if (onGameFinished != null) {
+                onGameFinished!!(playerInput.toList())
             }
 
-            GameState.IDLE -> {
-
-                onGameFinished?.invoke(emptyList())
-            }
-
-            else -> {
-
-                // se la partita non è terminata
-                // comportamento equivalente a "Fine partita"
-                endGame()
-            }
+            return
         }
+
+        if (gameState == GameState.IDLE) {
+            if (onGameFinished != null) {
+                onGameFinished!!(emptyList())
+            }
+
+            return
+        }
+
+        endGame()
     }
 
     // =========================
@@ -246,7 +235,7 @@ class GameViewModel : ViewModel() {
         computerJob?.cancel()
 
         _sequence.clear()
-        _playerInput.clear()
+        playerInput.clear()
 
         currentPlayerIndex = 0
 
@@ -290,15 +279,14 @@ class GameViewModel : ViewModel() {
 
     fun textAreaContent(): String {
 
-        return when (gameState) {
-
-            GameState.COMPUTER_TURN,
-            GameState.PAUSED -> ""
-
-            else -> {
-                if (_playerInput.isEmpty()) "-"
-                else _playerInput.joinToString(", ")
-            }
+        if (gameState == GameState.COMPUTER_TURN || gameState == GameState.PAUSED) {
+            return ""
         }
+
+        if (playerInput.isEmpty()) {
+            return "-"
+        }
+
+        return playerInput.joinToString(", ")
     }
 }

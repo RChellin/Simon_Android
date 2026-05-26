@@ -50,7 +50,11 @@ class MainActivity : ComponentActivity() {
                                         curListOfList.add(passedList)
                                     }
 
-                                    navController.navigate("GameListScreen")
+                                    navController.navigate("GameListScreen") {
+                                        popUpTo("GameScreen") {
+                                            inclusive = true
+                                        }
+                                    }
                                 }
                             )
                         }
