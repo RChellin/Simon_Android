@@ -11,11 +11,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
-data class GameResult(
-    val sequence: List<String>,
-    val errorIndex: Int,
-    val maxCorrectLength: Int
-)
 enum class GameState {
     IDLE,               // schermata appena aperta
     COMPUTER_TURN,      // il computer mostra la sequenza
