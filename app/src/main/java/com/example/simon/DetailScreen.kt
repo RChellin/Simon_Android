@@ -22,7 +22,7 @@ import kotlin.collections.joinToString
 
 @Composable
 fun DetailScreen(
-    curList: MutableList<String>
+    gameResult: GameResult
 ) {
     val spacing = 12.dp
     val smallSpacing = 6.dp
@@ -47,7 +47,7 @@ fun DetailScreen(
                 )
         ) {
             Text(
-                text = curList.size.toString(),
+                text = gameResult.sequence.size.toString(),
                 color = MaterialTheme.colorScheme.onPrimary,
                 style = MaterialTheme.typography.labelLarge.copy(
                     fontWeight = FontWeight.Bold
@@ -60,7 +60,7 @@ fun DetailScreen(
         //SEQUENCE degli elementi
         Text(
             //se non ho inserito elementi scrivo "successione vuota"
-            text = if (curList.isEmpty()) stringResource(R.string.successione_vuota) else curList.joinToString(
+            text = if (gameResult.sequence.isEmpty()) stringResource(R.string.successione_vuota) else gameResult.sequence.joinToString(
                 ", "
             ),
             style = MaterialTheme.typography.bodyMedium,

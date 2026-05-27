@@ -11,6 +11,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
+data class GameResult(
+    val sequence: List<String>,
+    val errorIndex: Int
+)
 enum class GameState {
     IDLE,               // schermata appena aperta
     COMPUTER_TURN,      // il computer mostra la sequenza
@@ -45,7 +49,7 @@ class GameViewModel : ViewModel() {
     private var computerJob: Job? = null
 
     // callback esterna già esistente
-    var onGameFinished: ((List<String>) -> Unit)? = null
+    var onGameFinished: (GameResult) -> Unit = {}
 
     // =========================
     // AVVIO PARTITA
@@ -171,28 +175,30 @@ class GameViewModel : ViewModel() {
         if (_sequence.size == 1 && gameState == GameState.COMPUTER_TURN) {
             resetGame()
 
-            if (onGameFinished != null) {
-                onGameFinished!!(emptyList())
-            }
+            onGameFinished(
+                GameResult(
+                    sequence = emptyList(),
+                    errorIndex = -1
+                )
+            )
 
             return
         }
 
         gameState = GameState.GAME_OVER
-        errorMessage = "Partita terminata"
 
-        val partialSequence = mutableListOf<String>()
+        var errorIndex = currentPlayerIndex
 
-        partialSequence.addAll(playerInput)
-
-        // Se il giocatore non ha ancora premuto nulla, considero errore sul primo rettangolo
-        if (playerInput.isEmpty() && _sequence.isNotEmpty()) {
-            partialSequence.add("ERRORE")
+        if (playerInput.isEmpty()) {
+            errorIndex = 0
         }
 
-        if (onGameFinished != null) {
-            onGameFinished!!(playerInput)
-        }
+        val result = GameResult(
+            sequence = _sequence.toList(),
+            errorIndex = errorIndex
+        )
+
+        onGameFinished(result)
     }
 
     // =========================
@@ -202,17 +208,24 @@ class GameViewModel : ViewModel() {
     fun onBackPressed() {
 
         if (gameState == GameState.GAME_OVER) {
-            if (onGameFinished != null) {
-                onGameFinished!!(playerInput.toList())
-            }
+
+            val result = GameResult(
+                sequence = _sequence.toList(),
+                errorIndex = currentPlayerIndex
+            )
+            onGameFinished(result)
 
             return
         }
 
         if (gameState == GameState.IDLE) {
-            if (onGameFinished != null) {
-                onGameFinished!!(emptyList())
-            }
+
+            onGameFinished(
+                GameResult(
+                    sequence = emptyList(),
+                    errorIndex = -1
+                )
+            )
 
             return
         }

@@ -35,8 +35,8 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun GameListScreen(
-    curListOfList: MutableList<List<String>>,
-    onAskDetail: (List<String>) -> Unit,
+    gameResults: List<GameResult>,
+    onAskDetail: (GameResult) -> Unit,
     onPlay: () -> Unit
 ) {
     val spacing = 12.dp
@@ -91,9 +91,8 @@ fun GameListScreen(
                     verticalArrangement = Arrangement.spacedBy(smallSpacing)
                 ) {
 
-                    items(curListOfList.reversed()) { sequence ->
+                    items(gameResults.reversed()) { game ->
 
-                        //RECAP singola sequenza
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -101,12 +100,11 @@ fun GameListScreen(
                                 .background(MaterialTheme.colorScheme.surfaceVariant)
                                 .padding(spacing)
                                 .clickable(
-                                    onClick = { onAskDetail(sequence) }
+                                    onClick = { onAskDetail(game) }
                                 ),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
 
-                            //NUMBER elementi
                             Box(
                                 modifier = Modifier
                                     .clip(shape)
@@ -117,7 +115,7 @@ fun GameListScreen(
                                     )
                             ) {
                                 Text(
-                                    text = sequence.size.toString(),
+                                    text = game.errorIndex.toString(),
                                     color = MaterialTheme.colorScheme.onPrimary,
                                     style = MaterialTheme.typography.labelLarge.copy(
                                         fontWeight = FontWeight.Bold
@@ -127,14 +125,8 @@ fun GameListScreen(
 
                             Spacer(modifier = Modifier.width(spacing))
 
-                            //SEQUENZA
                             Text(
-                                text =
-                                    if (sequence.isEmpty())
-                                        stringResource(R.string.successione_vuota)
-                                    else
-                                        sequence.joinToString(", "),
-
+                                text = game.sequence.joinToString(", "),
                                 style = MaterialTheme.typography.bodyMedium,
                                 modifier = Modifier.weight(1f),
                                 maxLines = 1,

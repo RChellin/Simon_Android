@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
@@ -28,10 +29,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             SimonTheme {
                 val navController = rememberNavController()
-                //tra uno Screen e l'altro passo una Lista di Liste di Stringhe
-                //ogni lista di Stringhe interna è una sequenza
-                val curListOfList = rememberSaveable { mutableStateListOf<List<String>>() }
-                val curList = rememberSaveable {mutableStateListOf<String>() }
+                //tra uno Screen e l'altro passo una Lista di GameResult
+                //ogni GameResult interna è una sequenza e un indice d'errore
+                val gameResults = rememberSaveable { mutableStateListOf<GameResult>() }
+                val selectedGame = rememberSaveable { mutableStateOf<GameResult?>(null) }
 
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     NavHost(
@@ -44,10 +45,10 @@ class MainActivity : ComponentActivity() {
                     ) {
                         composable("GameScreen") {
                             GameScreen(
-                                onGameFinished = { passedList ->
+                                onGameFinished = { result ->
 
-                                    if (passedList.isNotEmpty()) {
-                                        curListOfList.add(passedList)
+                                    if (result.sequence.isNotEmpty()) {
+                                        gameResults.add(result)
                                     }
 
                                     navController.navigate("GameListScreen") {
@@ -59,20 +60,21 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable("GameListScreen") {
-                            GameListScreen(curListOfList,
-                                onAskDetail={
-                                    passedList ->
-                                    curList.clear()
-                                    curList.addAll(passedList)
+                            GameListScreen(
+                                gameResults = gameResults,
+                                onAskDetail = { result ->
+                                    selectedGame.value = result
                                     navController.navigate("DetailScreen")
                                 },
-                                onPlay={
+                                onPlay = {
                                     navController.navigate("GameScreen")
                                 }
                             )
                         }
                         composable("DetailScreen") {
-                            DetailScreen(curList)
+                            if (selectedGame.value != null) {
+                                DetailScreen(selectedGame.value!!)
+                            }
                         }
                     }
                 }

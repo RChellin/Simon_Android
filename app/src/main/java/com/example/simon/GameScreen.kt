@@ -40,7 +40,7 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun GameScreen(
-    onGameFinished: (List<String>) -> Unit,
+    onGameFinished: (GameResult) -> Unit,
     viewModel: GameViewModel = viewModel()
 ) {
     val spacing = 12.dp
