@@ -28,8 +28,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 
 
@@ -115,7 +118,7 @@ fun GameListScreen(
                                     )
                             ) {
                                 Text(
-                                    text = game.errorIndex.toString(),
+                                    text = game.maxCorrectLength.toString(),
                                     color = MaterialTheme.colorScheme.onPrimary,
                                     style = MaterialTheme.typography.labelLarge.copy(
                                         fontWeight = FontWeight.Bold
@@ -125,8 +128,31 @@ fun GameListScreen(
 
                             Spacer(modifier = Modifier.width(spacing))
 
+                            val correct = game.sequence
+                                .take(game.errorIndex)
+                                .joinToString(", ")
+
+                            val wrong = game.sequence
+                                .drop(game.errorIndex)
+                                .joinToString(", ")
+
                             Text(
-                                text = game.sequence.joinToString(", "),
+                                text = buildAnnotatedString {
+                                    append(correct)
+
+                                    if (correct.isNotEmpty() && wrong.isNotEmpty()) {
+                                        append(", ")
+                                    }
+
+                                    withStyle(
+                                        style = SpanStyle(
+                                            color = MaterialTheme.colorScheme.error,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    ) {
+                                        append(wrong)
+                                    }
+                                },
                                 style = MaterialTheme.typography.bodyMedium,
                                 modifier = Modifier.weight(1f),
                                 maxLines = 1,

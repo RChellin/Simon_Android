@@ -13,7 +13,8 @@ import kotlin.random.Random
 
 data class GameResult(
     val sequence: List<String>,
-    val errorIndex: Int
+    val errorIndex: Int,
+    val maxCorrectLength: Int
 )
 enum class GameState {
     IDLE,               // schermata appena aperta
@@ -47,6 +48,8 @@ class GameViewModel : ViewModel() {
 
     // job per gestione animazione computer
     private var computerJob: Job? = null
+
+    private var maxCorrectLength = 0
 
     // callback esterna già esistente
     var onGameFinished: (GameResult) -> Unit = {}
@@ -133,14 +136,12 @@ class GameViewModel : ViewModel() {
         // sequenza completata correttamente
         if (currentPlayerIndex == _sequence.size) {
 
+            maxCorrectLength = _sequence.size
             firstRoundCompleted = true
 
             viewModelScope.launch {
-
                 delay(800)
-
                 addNewColor()
-
                 showSequence()
             }
         }
@@ -178,7 +179,8 @@ class GameViewModel : ViewModel() {
             onGameFinished(
                 GameResult(
                     sequence = emptyList(),
-                    errorIndex = -1
+                    errorIndex = -1,
+                    maxCorrectLength = -1
                 )
             )
 
@@ -195,7 +197,8 @@ class GameViewModel : ViewModel() {
 
         val result = GameResult(
             sequence = _sequence.toList(),
-            errorIndex = errorIndex
+            errorIndex = errorIndex,
+            maxCorrectLength = maxCorrectLength
         )
 
         onGameFinished(result)
@@ -211,7 +214,8 @@ class GameViewModel : ViewModel() {
 
             val result = GameResult(
                 sequence = _sequence.toList(),
-                errorIndex = currentPlayerIndex
+                errorIndex = currentPlayerIndex,
+                maxCorrectLength = maxCorrectLength
             )
             onGameFinished(result)
 
@@ -223,7 +227,8 @@ class GameViewModel : ViewModel() {
             onGameFinished(
                 GameResult(
                     sequence = emptyList(),
-                    errorIndex = -1
+                    errorIndex = -1,
+                    maxCorrectLength = -1
                 )
             )
 
@@ -251,6 +256,7 @@ class GameViewModel : ViewModel() {
         playerInput.clear()
 
         currentPlayerIndex = 0
+        maxCorrectLength = 0
 
         activeColor = null
         errorMessage = null
