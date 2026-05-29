@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -32,8 +33,7 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 //tra uno Screen e l'altro passo una Lista di GameResult
                 //ogni GameResult interna è una sequenza e un indice d'errore
-                val gameResults = rememberSaveable { mutableStateListOf<GameResult>() }
-                val selectedGame = rememberSaveable { mutableStateOf<GameResult?>(null) }
+                val selectedGame = remember { mutableStateOf<GameResult?>(null) }
                 val gameListViewModel: GameListViewModel = viewModel()
 
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
@@ -49,10 +49,7 @@ class MainActivity : ComponentActivity() {
                             GameScreen(
                                 onGameFinished = { result ->
 
-                                    if (result.sequence.isNotEmpty()) {
-                                        gameResults.add(result)
-                                        gameListViewModel.addGameResult(result)
-                                    }
+                                    gameListViewModel.addGameResult(result)
 
                                     navController.navigate("GameListScreen") {
                                         popUpTo("GameScreen") {
