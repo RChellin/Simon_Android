@@ -11,6 +11,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -22,11 +25,26 @@ import kotlin.collections.joinToString
 
 @Composable
 fun DetailScreen(
-    gameResult: GameResult
+    gameId: Int,
+    gameListViewModel: GameListViewModel
 ) {
+    val gameResultState = remember { mutableStateOf<GameResult?>(null) }
+
+    LaunchedEffect(gameId) {
+        gameResultState.value = gameListViewModel.getGameById(gameId)
+    }
+
+    val gameResult = gameResultState.value
+
+    if (gameResult == null) {
+        Text("Caricamento...")
+        return
+    }
+
     val spacing = 12.dp
     val smallSpacing = 6.dp
     val shape = RoundedCornerShape(12.dp)
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -36,7 +54,6 @@ fun DetailScreen(
         verticalAlignment = Alignment.CenterVertically
     ) {
 
-        //NUMBER di elementi per la singola sequnza in esame
         Box(
             modifier = Modifier
                 .clip(shape)
@@ -47,7 +64,7 @@ fun DetailScreen(
                 )
         ) {
             Text(
-                text = gameResult.sequence.size.toString(),
+                text = gameResult.maxCorrectLength.toString(),
                 color = MaterialTheme.colorScheme.onPrimary,
                 style = MaterialTheme.typography.labelLarge.copy(
                     fontWeight = FontWeight.Bold
@@ -56,13 +73,9 @@ fun DetailScreen(
         }
 
         Spacer(modifier = Modifier.width(spacing))
-        
-        //SEQUENCE degli elementi
+
         Text(
-            //se non ho inserito elementi scrivo "successione vuota"
-            text = if (gameResult.sequence.isEmpty()) stringResource(R.string.successione_vuota) else gameResult.sequence.joinToString(
-                ", "
-            ),
+            text = gameResult.sequence.joinToString(", "),
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.weight(1f),
             maxLines = 1,

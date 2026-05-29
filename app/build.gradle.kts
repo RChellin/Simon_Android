@@ -57,6 +57,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.compose.ui.text)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.compose.runtime)
     //ROOM
     val roomVersion = "2.8.4"
 

@@ -41,4 +41,8 @@ class GameListViewModel(application: Application) : AndroidViewModel(application
             loadGames()
         }
     }
+
+    suspend fun getGameById(id: Int): GameResult? {
+        return dao.getGameById(id)?.toGameResult()
+    }
 }

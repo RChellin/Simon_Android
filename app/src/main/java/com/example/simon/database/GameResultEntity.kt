@@ -15,6 +15,7 @@ data class GameResultEntity(
 )
 fun GameResult.toEntity(): GameResultEntity {
     return GameResultEntity(
+        id = id,
         sequence = sequence.joinToString(","),
         errorIndex = errorIndex,
         maxCorrectLength = maxCorrectLength
@@ -23,8 +24,10 @@ fun GameResult.toEntity(): GameResultEntity {
 
 fun GameResultEntity.toGameResult(): GameResult {
     return GameResult(
-        sequence = sequence.split(",").filter { it.isNotEmpty() },
+        id = id,
+        sequence = sequence.split(","),
         errorIndex = errorIndex,
         maxCorrectLength = maxCorrectLength
     )
 }
+
