@@ -2,9 +2,12 @@ package com.example.simon
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -44,42 +47,71 @@ fun DetailScreen(
     val spacing = 12.dp
     val smallSpacing = 6.dp
     val shape = RoundedCornerShape(12.dp)
-
-    Row(
+    Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .clip(shape)
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(spacing),
-        verticalAlignment = Alignment.CenterVertically
+            .fillMaxSize()
+            .padding(spacing)
     ) {
 
-        Box(
-            modifier = Modifier
-                .clip(shape)
-                .background(MaterialTheme.colorScheme.primary)
-                .padding(
-                    horizontal = spacing * 0.75f,
-                    vertical = smallSpacing
-                )
-        ) {
+        Column(modifier = Modifier.padding(bottom = spacing)) {
+
+            //TITLE della pagina
             Text(
-                text = gameResult.maxCorrectLength.toString(),
-                color = MaterialTheme.colorScheme.onPrimary,
-                style = MaterialTheme.typography.labelLarge.copy(
+                text = "Dettaglio Partita",
+                style = MaterialTheme.typography.headlineSmall.copy(
                     fontWeight = FontWeight.Bold
                 )
             )
+
+            Spacer(modifier = Modifier.height(smallSpacing))
+
+            //LINE per stile
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.15f)
+                    .height(2.dp)
+                    .background(
+                        MaterialTheme.colorScheme.primary,
+                        RoundedCornerShape(percent = 50)
+                    )
+            )
         }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(shape)
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .padding(spacing),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
 
-        Spacer(modifier = Modifier.width(spacing))
+            Box(
+                modifier = Modifier
+                    .clip(shape)
+                    .background(MaterialTheme.colorScheme.primary)
+                    .padding(
+                        horizontal = spacing * 0.75f,
+                        vertical = smallSpacing
+                    )
+            ) {
+                Text(
+                    text = gameResult.maxCorrectLength.toString(),
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    style = MaterialTheme.typography.labelLarge.copy(
+                        fontWeight = FontWeight.Bold
+                    )
+                )
+            }
 
-        Text(
-            text = gameResult.sequence.joinToString(", "),
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.weight(1f),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
+            Spacer(modifier = Modifier.width(spacing))
+
+            Text(
+                text = gameResult.sequence.joinToString(", "),
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.weight(1f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
     }
 }

@@ -73,7 +73,6 @@ fun GameScreen(
                     Row {
                         for (col in 0 until 2) {    //2 colonne
                             val index = row * 2 + col   //calcolo indice
-
                             Button(
                                 onClick = {
                                     viewModel.onColorPressed(colorsL[index])
