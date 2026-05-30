@@ -268,7 +268,6 @@ fun GameScreen(
             ) {
 
                 //TEXT BOX con scroll se cresce troppo
-
                 BoxWithConstraints {
 
                     val maxTextHeight = maxHeight * (2f / 3f)

@@ -1,15 +1,18 @@
 package com.example.simon
 
+import android.app.Application
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.random.Random
+import android.media.AudioAttributes
+import android.media.SoundPool
 
 enum class GameState {
     IDLE,               // schermata appena aperta
@@ -19,8 +22,7 @@ enum class GameState {
     GAME_OVER           // il giocatore ha sbagliato
 }
 
-class GameViewModel : ViewModel() {
-
+class GameViewModel(application: Application) : AndroidViewModel(application) {
     // =========================
     // DATI DI GIOCO
     // =========================
@@ -48,6 +50,23 @@ class GameViewModel : ViewModel() {
 
     // callback esterna già esistente
     var onGameFinished: (GameResult) -> Unit = {}
+
+    private val soundPool: SoundPool
+
+    private val soundIds = mutableMapOf<String, Int>()
+
+    init {
+        val audioAttributes = AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_GAME).setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build()
+
+        soundPool = SoundPool.Builder().setMaxStreams(6).setAudioAttributes(audioAttributes).build()
+
+        soundIds["R"] = soundPool.load(application, R.raw.pa, 1)
+        soundIds["G"] = soundPool.load(application, R.raw.pe, 1)
+        soundIds["B"] = soundPool.load(application, R.raw.po, 1)
+        soundIds["M"] = soundPool.load(application, R.raw.paa, 1)
+        soundIds["Y"] = soundPool.load(application, R.raw.pi, 1)
+        soundIds["C"] = soundPool.load(application, R.raw.pu, 1)
+    }
 
     // =========================
     // AVVIO PARTITA
@@ -84,6 +103,7 @@ class GameViewModel : ViewModel() {
                 if (gameState != GameState.COMPUTER_TURN) return@launch
 
                 activeColor = color
+                playSound(color)
                 delay(600)
 
                 activeColor = null
@@ -108,15 +128,12 @@ class GameViewModel : ViewModel() {
 
         // feedback visivo
         activeColor = color
+        playSound(color)
 
         viewModelScope.launch {
             delay(600)
             activeColor = null
         }
-
-        // TODO:
-        // riproduzione suono del colore
-
         // controllo correttezza input
         if (color != _sequence[currentPlayerIndex]) {
 
@@ -270,13 +287,11 @@ class GameViewModel : ViewModel() {
     }
 
     fun isPauseEnabled(): Boolean {
-        return gameState == GameState.COMPUTER_TURN ||
-                gameState == GameState.PAUSED
+        return gameState == GameState.COMPUTER_TURN || gameState == GameState.PAUSED
     }
 
     fun isEndGameEnabled(): Boolean {
-        return gameState != GameState.IDLE &&
-                gameState != GameState.GAME_OVER
+        return gameState != GameState.IDLE && gameState != GameState.GAME_OVER
     }
 
     fun isColorButtonsEnabled(): Boolean {
@@ -302,5 +317,19 @@ class GameViewModel : ViewModel() {
         }
 
         return playerInput.joinToString(", ")
+    }
+
+    private fun playSound(color: String) {
+
+        val soundId = soundIds[color] ?: return
+
+        soundPool.play(
+            soundId,
+            1f,
+            1f,
+            1,
+            0,
+            1f
+        )
     }
 }
