@@ -206,7 +206,9 @@ class GameViewModel(
         if (gameState == GameState.PAUSED) {
             gameState = GameState.COMPUTER_TURN
             saveGameState()
-            showSequence()
+            if (computerJob?.isActive != true) {
+                showSequence()
+            }
         }
     }
 
