@@ -59,6 +59,7 @@ class GameViewModel(
 
     // job per gestione animazione computer
     private var computerJob: Job? = null
+    private var errorBlinkJob: Job? = null
 
     private var maxCorrectLength: Int =
         savedStateHandle["max_correct_length"] ?: 0
@@ -83,6 +84,9 @@ class GameViewModel(
         soundIds["M"] = soundPool.load(application, R.raw.paa, 1)
         soundIds["Y"] = soundPool.load(application, R.raw.pi, 1)
         soundIds["C"] = soundPool.load(application, R.raw.pu, 1)
+
+        soundIds["error"] = soundPool.load(application, R.raw.error, 1)
+
 
         if (gameState == GameState.COMPUTER_TURN) {
             showSequence()
@@ -162,12 +166,30 @@ class GameViewModel(
         }
         // controllo correttezza input
         if (color != _sequence[currentPlayerIndex]) {
+
             errorIndex = currentPlayerIndex
             saveErrorIndex()
+
             errorMessage = "Sequenza errata!"
             saveErrorMessage()
+
             gameState = GameState.GAME_OVER
             saveGameState()
+
+            val correctColor = _sequence[errorIndex]
+
+            playErrorSound()
+            errorBlinkJob?.cancel()
+
+            errorBlinkJob = viewModelScope.launch {
+                while (gameState == GameState.GAME_OVER) {
+                    activeColor = correctColor
+                    delay(500)
+
+                    activeColor = null
+                    delay(300)
+                }
+            }
 
             return
         }
@@ -304,6 +326,7 @@ class GameViewModel(
     private fun resetGame() {
 
         computerJob?.cancel()
+        errorBlinkJob?.cancel()
 
         _sequence.clear()
         saveSequence()
@@ -414,5 +437,24 @@ class GameViewModel(
             0,
             1f
         )
+    }
+    private fun playErrorSound() {
+        soundPool.play(
+            soundIds["error"] ?: return,
+            1f,
+            1f,
+            1,
+            0,
+            1f
+        )
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+
+        computerJob?.cancel()
+        errorBlinkJob?.cancel()
+
+        soundPool.release()
     }
 }
