@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import kotlin.random.Random
 import android.media.AudioAttributes
 import android.media.SoundPool
+import androidx.lifecycle.SavedStateHandle
 
 enum class GameState {
     IDLE,               // schermata appena aperta
@@ -22,31 +23,47 @@ enum class GameState {
     GAME_OVER           // il giocatore ha sbagliato
 }
 
-class GameViewModel(application: Application) : AndroidViewModel(application) {
+class GameViewModel(
+    application: Application,
+    private val savedStateHandle: SavedStateHandle
+) : AndroidViewModel(application) {
     // =========================
     // DATI DI GIOCO
     // =========================
 
     private val availableColors = listOf("R", "G", "B", "M", "Y", "C")
 
-    private val _sequence = mutableStateListOf<String>()
-    val playerInput = mutableStateListOf<String>()
-    var gameState by mutableStateOf(GameState.IDLE)
+    private val _sequence = mutableStateListOf<String>().apply {
+        addAll(savedStateHandle["sequence"] ?: emptyList())
+    }
+    val playerInput = mutableStateListOf<String>().apply {
+        addAll(savedStateHandle["player_input"] ?: emptyList())
+    }
+    var gameState by mutableStateOf(
+        GameState.valueOf(savedStateHandle["game_state"] ?: GameState.IDLE.name)
+    )
 
+    var errorMessage by mutableStateOf<String?>(
+        savedStateHandle["error_message"]
+    )
     var activeColor by mutableStateOf<String?>(null)
 
-    var errorMessage by mutableStateOf<String?>(null)
 
     // indice corrente inserito dal giocatore
-    private var currentPlayerIndex = 0
+    private var currentPlayerIndex: Int =
+        savedStateHandle["cur_player_index"] ?: 0
 
     // usato per capire se la prima sequenza è stata completata
-    private var firstRoundCompleted = false
+    private var firstRoundCompleted: Boolean =
+        savedStateHandle["first_round_completed"] ?: false
 
     // job per gestione animazione computer
     private var computerJob: Job? = null
 
-    private var maxCorrectLength = 0
+    private var maxCorrectLength: Int =
+        savedStateHandle["max_correct_length"] ?: 0
+
+    var errorIndex: Int = savedStateHandle["error_index"] ?: -1
 
     // callback esterna già esistente
     var onGameFinished: (GameResult) -> Unit = {}
@@ -66,6 +83,10 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         soundIds["M"] = soundPool.load(application, R.raw.paa, 1)
         soundIds["Y"] = soundPool.load(application, R.raw.pi, 1)
         soundIds["C"] = soundPool.load(application, R.raw.pu, 1)
+
+        if (gameState == GameState.COMPUTER_TURN) {
+            showSequence()
+        }
     }
 
     // =========================
@@ -92,7 +113,9 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         computerJob = viewModelScope.launch {
 
             gameState = GameState.COMPUTER_TURN
+            saveGameState()
             playerInput.clear()
+            savePlayerInput()
 
             for (color in _sequence) {
 
@@ -112,7 +135,9 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
             activeColor = null
             currentPlayerIndex = 0
+            saveCurrentPlayerIndex()
             gameState = GameState.PLAYER_TURN
+            saveGameState()
         }
     }
 
@@ -125,6 +150,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         if (gameState != GameState.PLAYER_TURN) return
 
         playerInput.add(color)
+        savePlayerInput()
 
         // feedback visivo
         activeColor = color
@@ -136,20 +162,26 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         }
         // controllo correttezza input
         if (color != _sequence[currentPlayerIndex]) {
-
+            errorIndex = currentPlayerIndex
+            saveErrorIndex()
             errorMessage = "Sequenza errata!"
+            saveErrorMessage()
             gameState = GameState.GAME_OVER
+            saveGameState()
 
             return
         }
 
         currentPlayerIndex++
+        saveCurrentPlayerIndex()
 
         // sequenza completata correttamente
         if (currentPlayerIndex == _sequence.size) {
 
             maxCorrectLength = _sequence.size
+            saveMaxCorrectLength()
             firstRoundCompleted = true
+            saveFirstRoundCompleted()
 
             viewModelScope.launch {
                 delay(800)
@@ -167,11 +199,14 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
         if (gameState == GameState.COMPUTER_TURN) {
             gameState = GameState.PAUSED
+            saveGameState()
             return
         }
 
         if (gameState == GameState.PAUSED) {
             gameState = GameState.COMPUTER_TURN
+            saveGameState()
+            showSequence()
         }
     }
 
@@ -200,12 +235,15 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         gameState = GameState.GAME_OVER
+        saveGameState()
 
-        var errorIndex = currentPlayerIndex
+        errorIndex = currentPlayerIndex
 
         if (playerInput.isEmpty()) {
             errorIndex = 0
         }
+
+        saveErrorIndex()
 
         val result = GameResult(
             sequence = _sequence.toList(),
@@ -226,7 +264,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
             val result = GameResult(
                 sequence = _sequence.toList(),
-                errorIndex = currentPlayerIndex,
+                errorIndex = errorIndex,
                 maxCorrectLength = maxCorrectLength
             )
             onGameFinished(result)
@@ -258,6 +296,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         _sequence.add(
             availableColors.random(Random(System.currentTimeMillis()))
         )
+        saveSequence()
     }
 
     private fun resetGame() {
@@ -265,23 +304,65 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         computerJob?.cancel()
 
         _sequence.clear()
+        saveSequence()
+
         playerInput.clear()
+        savePlayerInput()
 
         currentPlayerIndex = 0
+        saveCurrentPlayerIndex()
+
         maxCorrectLength = 0
+        saveMaxCorrectLength()
 
         activeColor = null
+
         errorMessage = null
+        saveErrorMessage()
+
+        errorIndex = -1
+        saveErrorIndex()
 
         firstRoundCompleted = false
+        saveFirstRoundCompleted()
 
         gameState = GameState.IDLE
+        saveGameState()
     }
 
     // =========================
     // HELPERS UI
     // =========================
+    private fun saveSequence() {
+        savedStateHandle["sequence"] = ArrayList(_sequence)
+    }
 
+    private fun savePlayerInput() {
+        savedStateHandle["player_input"] = ArrayList(playerInput)
+    }
+
+    private fun saveGameState() {
+        savedStateHandle["game_state"] = gameState.name
+    }
+
+    private fun saveCurrentPlayerIndex() {
+        savedStateHandle["cur_player_index"] = currentPlayerIndex
+    }
+
+    private fun saveFirstRoundCompleted() {
+        savedStateHandle["first_round_completed"] = firstRoundCompleted
+    }
+
+    private fun saveMaxCorrectLength() {
+        savedStateHandle["max_correct_length"] = maxCorrectLength
+    }
+
+    private fun saveErrorMessage() {
+        savedStateHandle["error_message"] = errorMessage
+    }
+    private fun saveErrorIndex() {
+        savedStateHandle["error_index"] = errorIndex
+    }
     fun isStartEnabled(): Boolean {
         return gameState == GameState.IDLE
     }
