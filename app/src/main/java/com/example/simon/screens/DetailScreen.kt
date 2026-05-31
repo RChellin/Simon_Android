@@ -1,4 +1,4 @@
-package com.example.simon
+package com.example.simon.screens
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -35,6 +35,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.simon.GameListViewModel
+import com.example.simon.GameResult
+import com.example.simon.R
 import kotlin.collections.joinToString
 
 //titolo schermata dettaglio

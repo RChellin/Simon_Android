@@ -1,4 +1,4 @@
-package com.example.simon
+package com.example.simon.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -34,6 +34,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import com.example.simon.GameResult
+import com.example.simon.R
 
 
 @Composable

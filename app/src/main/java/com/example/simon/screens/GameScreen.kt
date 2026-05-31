@@ -1,4 +1,4 @@
-package com.example.simon
+package com.example.simon.screens
 
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.activity.compose.BackHandler
@@ -36,6 +36,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.simon.GameResult
+import com.example.simon.GameViewModel
+import com.example.simon.R
 
 @Composable
 fun GameScreen(

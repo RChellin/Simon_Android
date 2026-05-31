@@ -15,6 +15,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.simon.screens.DetailScreen
+import com.example.simon.screens.GameListScreen
+import com.example.simon.screens.GameScreen
 import com.example.simon.ui.theme.SimonTheme
 
 class MainActivity : ComponentActivity() {
