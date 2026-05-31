@@ -79,7 +79,7 @@ fun GameListScreen(
         BoxWithConstraints(
             modifier = Modifier.weight(1f)
         ) {
-
+            //limita l'altezza della lista per lasciare spazio al bottone gioca
             val maxTextHeight = maxHeight * (5f / 6f)
 
             Column(
@@ -107,7 +107,7 @@ fun GameListScreen(
                                 ),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-
+                            //riquadro con il punteggio massimo corretto
                             Box(
                                 modifier = Modifier
                                     .clip(shape)
@@ -127,11 +127,11 @@ fun GameListScreen(
                             }
 
                             Spacer(modifier = Modifier.width(spacing))
-
+                            //parte corretta della sequenza
                             val correct = game.sequence
                                 .take(game.errorIndex)
                                 .joinToString(", ")
-
+                            //parte errata della sequenza
                             val wrong = game.sequence
                                 .drop(game.errorIndex)
                                 .joinToString(", ")
@@ -143,7 +143,7 @@ fun GameListScreen(
                                     if (correct.isNotEmpty() && wrong.isNotEmpty()) {
                                         append(", ")
                                     }
-
+                                    //evidenzia in rosso la parte della sequenza da cui parte l'errore
                                     withStyle(
                                         style = SpanStyle(
                                             color = MaterialTheme.colorScheme.error,
@@ -163,7 +163,7 @@ fun GameListScreen(
                 }
 
                 Spacer(modifier = Modifier.height(spacing))
-
+                //bottone per avviare una nuova partita
                 ExtendedFloatingActionButton(
                     onClick = { onPlay() },
                     icon = {

@@ -10,17 +10,12 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.simon.ui.theme.SimonTheme
-
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,8 +26,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             SimonTheme {
                 val navController = rememberNavController()
-                //tra uno Screen e l'altro passo una Lista di GameResult
-                //ogni GameResult interna è una sequenza e un indice d'errore
+                //viewmodel condiviso tra lista e dettaglio delle partite
                 val gameListViewModel: GameListViewModel = viewModel()
 
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
@@ -47,7 +41,7 @@ class MainActivity : ComponentActivity() {
                         composable("GameScreen") {
                             GameScreen(
                                 onGameFinished = { result ->
-
+                                    //salva la partita conclusa e torna alla lista
                                     gameListViewModel.addGameResult(result)
 
                                     navController.navigate("GameListScreen") {
@@ -61,18 +55,19 @@ class MainActivity : ComponentActivity() {
                         composable("GameListScreen") {
                             GameListScreen(
                                 gameResults = gameListViewModel.gameResults,
+                                //passa al dettaglio usando l'id della partita salvata
                                 onAskDetail = { result ->
                                     navController.navigate("DetailScreen/${result.id}")
                                 },
+                                //avvia una nuova partita
                                 onPlay = {
                                     navController.navigate("GameScreen")
                                 }
                             )
                         }
                         composable("DetailScreen/{gameId}") { backStackEntry ->
-
+                            //recupera l'id della partita dalla route
                             val gameId = backStackEntry.arguments?.getString("gameId")?.toIntOrNull()
-
                             if (gameId != null) {
                                 DetailScreen(
                                     gameId = gameId,

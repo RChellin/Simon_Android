@@ -2,7 +2,6 @@ package com.example.simon
 
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.activity.compose.BackHandler
-
 import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -54,20 +53,18 @@ fun GameScreen(
         Color.Yellow,
         Color.Cyan
     )
-
-    val colorsL = listOf("R", "G", "B", "M", "Y", "C")
+    //prendo lista dal viewModel
+    val colorsL = viewModel.availableColors
     viewModel.onGameFinished = onGameFinished
 
     BackHandler {
         viewModel.onBackPressed()
     }
-
     //GRID di BOTTONI (colori)
     val grid = @Composable {
         BoxWithConstraints {
             val buttonHeight = maxHeight / 3
             val buttonWidth = maxWidth / 2
-
             Column {
                 for (row in 0 until 3) {    //3 righe
                     Row {
@@ -82,14 +79,12 @@ fun GameScreen(
                                         if (viewModel.activeColor == colorsL[index])
                                             colorsC[index]
                                         else
-                                            colorsC[index].copy(alpha = 0.35f),
-
+                                            colorsC[index].copy(alpha = 0.25f),
                                     disabledContainerColor =
                                         if (viewModel.activeColor == colorsL[index])
                                             colorsC[index]
                                         else
-                                            colorsC[index].copy(alpha = 0.35f),
-
+                                            colorsC[index].copy(alpha = 0.25f),
                                     contentColor = Color.Black,
                                     disabledContentColor = Color.Black
                                 ),
@@ -112,7 +107,6 @@ fun GameScreen(
             }
         }
     }
-
     //TEXTBOX che viene popolata dalla sequenza
     val textBox = @Composable {
         Box(
@@ -128,8 +122,8 @@ fun GameScreen(
             )
         }
     }
+    //BUTTON per avviare la partita
     val buttonStartGame = @Composable {
-
         Button(
             onClick = {
                 viewModel.startGame()
@@ -139,7 +133,6 @@ fun GameScreen(
             Text(text = stringResource(R.string.avvia))
         }
     }
-
     //BUTTON per salvare la sequenza e passare a Screen2
     val bottonEndGame = @Composable {
         Button(
@@ -151,19 +144,19 @@ fun GameScreen(
             Text(stringResource(R.string.fine_partita))
         }
     }
-
     //BUTTON per mettere il gioco in pausa e riprenderlo
     val buttonPauseResume = @Composable {
-            Button(
-                onClick = {
-                    viewModel.togglePause()
-                },
-                enabled = viewModel.isPauseEnabled()
-            ) {
-                Text(viewModel.pauseButtonText())
-            }
-
+        Button(
+            onClick = {
+                viewModel.togglePause()
+            },
+            enabled = viewModel.isPauseEnabled()
+        ) {
+            Text(viewModel.pauseButtonText())
+        }
     }
+
+    //SEZIONE per eventuale errorMessage
     @Composable
     fun ErrorMessage(showErrorMessage: Boolean) {
         if (showErrorMessage) {
@@ -176,8 +169,8 @@ fun GameScreen(
             )
         }
     }
-    val isPortrait = LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT
 
+    val isPortrait = LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT
     //necessario per scroll automatico
     val scrollState = rememberScrollState()
     LaunchedEffect(viewModel.playerInput.size) {
@@ -194,9 +187,7 @@ fun GameScreen(
             //dedico 1/4 dello spazio al textBox ed ai due bottoni, i restanti 3/4 alla grid
             val bottomSectionHeight = screenHeight / 4
             val gridSectionHeight = screenHeight * 3 / 4
-
             Column(modifier = Modifier.fillMaxSize()) {
-
                 //GRID di bottoni (per aggiungere elementi alla sequenza)
                 Box(
                     modifier = Modifier
@@ -205,9 +196,7 @@ fun GameScreen(
                 ) {
                     grid()
                 }
-
                 Spacer(modifier = Modifier.height(spacing))
-
                 //area dedicata a textBox e bottoni in basso
                 Column(
                     modifier = Modifier
@@ -215,7 +204,6 @@ fun GameScreen(
                         .fillMaxWidth(),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
-
                     //TEXT BOX con scroll se cresce troppo
                     Box(
                         modifier = Modifier
@@ -226,8 +214,7 @@ fun GameScreen(
                     }
                     ErrorMessage(viewModel.showErrorMessage)
                     Spacer(modifier = Modifier.height(spacing))
-
-                    //BUTTONS cancella e fine partita
+                    //BUTTONS start, end e pause/resume
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center
@@ -247,14 +234,11 @@ fun GameScreen(
                 .fillMaxSize()
                 .padding(spacing)
         ) {
-
             //GRID di bottoni (per aggiungere elementi alla sequenza)
             Box(modifier = Modifier.weight(1.5f)) {
                 grid()
             }
-
             Spacer(modifier = Modifier.width(spacing))
-
             //area dedicata a textBox e bottoni in basso
             Column(
                 modifier = Modifier
@@ -263,12 +247,9 @@ fun GameScreen(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-
                 //TEXT BOX con scroll se cresce troppo
                 BoxWithConstraints {
-
                     val maxTextHeight = maxHeight * (2f / 3f)
-
                     Box(
                         modifier = Modifier
                             .heightIn(max = maxTextHeight)
@@ -278,9 +259,7 @@ fun GameScreen(
                     }
                 }
                 ErrorMessage(viewModel.showErrorMessage)
-
                 Spacer(modifier = Modifier.height(spacing))
-
                 //BUTTONS cancella e fine partita
                 Row(
                     horizontalArrangement = Arrangement.Center
@@ -290,7 +269,6 @@ fun GameScreen(
                     bottonEndGame()
                 }
                 Spacer(modifier = Modifier.height(spacing))
-
                 //BUTTON pausa e ricomincia
                 Row(
                     horizontalArrangement = Arrangement.Center

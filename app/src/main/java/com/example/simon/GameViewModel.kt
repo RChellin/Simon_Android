@@ -29,11 +29,7 @@ class GameViewModel(
     application: Application,
     private val savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(application) {
-    // =========================
-    // DATI DI GIOCO
-    // =========================
-
-    private val availableColors = listOf("R", "G", "B", "M", "Y", "C")
+    val availableColors = listOf("R", "G", "B", "M", "Y", "C")
 
     private val _sequence = mutableStateListOf<String>().apply {
         addAll(savedStateHandle["sequence"] ?: emptyList())
@@ -68,7 +64,7 @@ class GameViewModel(
 
     var errorIndex: Int = savedStateHandle["error_index"] ?: -1
 
-    // callback esterna già esistente
+    // callback esterna
     var onGameFinished: (GameResult) -> Unit = {}
 
     private val soundPool: SoundPool
@@ -87,60 +83,49 @@ class GameViewModel(
         soundIds["M"] = soundPool.load(application, R.raw.paa, 1)
         soundIds["Y"] = soundPool.load(application, R.raw.pi, 1)
         soundIds["C"] = soundPool.load(application, R.raw.pu, 1)
-
         soundIds["error"] = soundPool.load(application, R.raw.error, 1)
-
 
         if (gameState == GameState.COMPUTER_TURN) {
             showSequence()
         }
     }
 
-    // =========================
-    // AVVIO PARTITA
-    // =========================
-
+    //*****GESTIONE START (BOTTONE avvia)*****
     fun startGame() {
         if (gameState != GameState.IDLE) return
-
         resetGame()
-
         addNewColor()
         showSequence()
     }
 
-    // =========================
-    // TURNO COMPUTER
-    // =========================
-
+    //*****GESTIONE TURNO COMPUTER*****
     private fun showSequence() {
-
         computerJob?.cancel()
-
         computerJob = viewModelScope.launch {
-
             gameState = GameState.COMPUTER_TURN
             saveGameState()
+            //svuota l'input precedente prima di mostrare la nuova sequenza
             playerInput.clear()
             savePlayerInput()
 
             for (color in _sequence) {
-
+                //mantiene la coroutine in attesa finché il gioco è in pausa
                 while (gameState == GameState.PAUSED) {
                     delay(100)
                 }
-
+                //interrompe la sequenza se lo stato è cambiato
                 if (gameState != GameState.COMPUTER_TURN) return@launch
-
+                // illumina e riproduce il colore corrente
                 activeColor = color
                 playSound(color)
                 delay(600)
-
+                //spegne il colore prima di passare al successivo
                 activeColor = null
                 delay(250)
             }
 
             activeColor = null
+            //prepara l'indice per l'inserimento della sequenza da parte del giocatore
             currentPlayerIndex = 0
             saveCurrentPlayerIndex()
             gameState = GameState.PLAYER_TURN
@@ -148,18 +133,13 @@ class GameViewModel(
         }
     }
 
-    // =========================
-    // INPUT GIOCATORE
-    // =========================
-
+    //*****GESTIONE INPUT GIOCATORE*****
     fun onColorPressed(color: String) {
-
         if (gameState != GameState.PLAYER_TURN) return
 
         playerInput.add(color)
         savePlayerInput()
-
-        // feedback visivo
+        //feedback visivo e sonoro del bottone premuto
         activeColor = color
         playSound(color)
 
@@ -167,9 +147,9 @@ class GameViewModel(
             delay(600)
             activeColor = null
         }
-        // controllo correttezza input
+        //controllo correttezza input
         if (color != _sequence[currentPlayerIndex]) {
-
+            //salva la posizione dell'errore
             errorIndex = currentPlayerIndex
             saveErrorIndex()
 
@@ -178,31 +158,29 @@ class GameViewModel(
 
             gameState = GameState.GAME_OVER
             saveGameState()
-
+            //colore corretto che avrebbe dovuto premere il giocatore
             val correctColor = _sequence[errorIndex]
 
             playErrorSound()
             errorBlinkJob?.cancel()
-
+            //fa lampeggiare il colore corretto finché la partita resta terminata
             errorBlinkJob = viewModelScope.launch {
                 while (gameState == GameState.GAME_OVER) {
                     activeColor = correctColor
                     delay(500)
-
                     activeColor = null
                     delay(300)
                 }
             }
-
             return
         }
-
+        //passa al prossimo colore da controllare
         currentPlayerIndex++
         saveCurrentPlayerIndex()
 
-        // sequenza completata correttamente
+        //sequenza completata correttamente
         if (currentPlayerIndex == _sequence.size) {
-
+            //prepara il turno successivo
             maxCorrectLength = _sequence.size
             saveMaxCorrectLength()
             firstRoundCompleted = true
@@ -216,12 +194,8 @@ class GameViewModel(
         }
     }
 
-    // =========================
-    // PAUSA / RIPRENDI
-    // =========================
-
+    //*****GESTIONE PAUSA/RIPRENDI*****
     fun togglePause() {
-
         if (gameState == GameState.COMPUTER_TURN) {
             gameState = GameState.PAUSED
             saveGameState()
@@ -237,19 +211,14 @@ class GameViewModel(
         }
     }
 
-    // =========================
-    // FINE PARTITA
-    // =========================
-
+    //*****GESTIONE FINE PARTITA (TASTO end game)*****
     fun endGame() {
-
         computerJob?.cancel()
         activeColor = null
 
-        // se è in corso la presentazione della prima sequenza la partita non viene salvata
+        //se è in corso la presentazione della prima sequenza la partita non viene salvata
         if (_sequence.size == 1 && gameState == GameState.COMPUTER_TURN) {
             resetGame()
-
             onGameFinished(
                 GameResult(
                     sequence = emptyList(),
@@ -257,50 +226,41 @@ class GameViewModel(
                     maxCorrectLength = -1
                 )
             )
-
             return
         }
 
         gameState = GameState.GAME_OVER
         saveGameState()
-
+        //considera come errore la posizione corrente raggiunta dal giocatore
         errorIndex = currentPlayerIndex
-
+        //se il giocatore non ha ancora inserito nulla, l'errore è all'inizio
         if (playerInput.isEmpty()) {
             errorIndex = 0
         }
-
         saveErrorIndex()
-
+        //crea il risultato da salvare e mostrare nella lista delle partite
         val result = GameResult(
             sequence = _sequence.toList(),
             errorIndex = errorIndex,
             maxCorrectLength = maxCorrectLength
         )
-
         onGameFinished(result)
     }
 
-    // =========================
-    // GESTIONE BACK
-    // =========================
-
+    //*****GESTIONE TASTO BACK*****
     fun onBackPressed() {
-
+        //se la partita è già terminata, salva il risultato corrente
         if (gameState == GameState.GAME_OVER) {
-
             val result = GameResult(
                 sequence = _sequence.toList(),
                 errorIndex = errorIndex,
                 maxCorrectLength = maxCorrectLength
             )
             onGameFinished(result)
-
             return
         }
-
+        //se il gioco non è mai partito, torna indietro senza salvare nulla
         if (gameState == GameState.IDLE) {
-
             onGameFinished(
                 GameResult(
                     sequence = emptyList(),
@@ -308,26 +268,20 @@ class GameViewModel(
                     maxCorrectLength = -1
                 )
             )
-
             return
         }
-
+        //se la partita è in corso, la termina come se è stato premuto end game
         endGame()
     }
 
-    // =========================
-    // UTILS
-    // =========================
-
     private fun addNewColor() {
-        _sequence.add(
-            availableColors.random(Random(System.currentTimeMillis()))
-        )
+        //aggiunge un colore casuale alla sequenza da riprodurre
+        _sequence.add(availableColors.random(Random(System.currentTimeMillis())))
         saveSequence()
     }
 
     private fun resetGame() {
-
+        //interrompe eventuali animazioni o lampeggi ancora attivi
         computerJob?.cancel()
         errorBlinkJob?.cancel()
 
@@ -358,9 +312,7 @@ class GameViewModel(
         saveGameState()
     }
 
-    // =========================
-    // HELPERS UI
-    // =========================
+    //*****SALVATAGGI DI STATEHANDLE*****
     private fun saveSequence() {
         savedStateHandle["sequence"] = ArrayList(_sequence)
     }
@@ -393,6 +345,7 @@ class GameViewModel(
         savedStateHandle["error_index"] = errorIndex
     }
 
+    //*****CONTROLLI DI STATO PER GAMESCREEN*****
     fun isStartEnabled(): Boolean {
         return gameState == GameState.IDLE
     }
@@ -419,49 +372,29 @@ class GameViewModel(
     }
 
     fun textAreaContent(): String {
-
         if (gameState == GameState.COMPUTER_TURN || gameState == GameState.PAUSED) {
             return ""
         }
-
         if (playerInput.isEmpty()) {
             return "-"
         }
-
         return playerInput.joinToString(", ")
     }
 
+    //*****RIPRODUZIONE DEI SUONI*****
     private fun playSound(color: String) {
-
         val soundId = soundIds[color] ?: return
-
-        soundPool.play(
-            soundId,
-            1f,
-            1f,
-            1,
-            0,
-            1f
-        )
+        soundPool.play(soundId, 1f, 1f, 1, 0, 1f)
     }
 
     private fun playErrorSound() {
-        soundPool.play(
-            soundIds["error"] ?: return,
-            1f,
-            1f,
-            1,
-            0,
-            1f
-        )
+        soundPool.play(soundIds["error"] ?: return, 1f, 1f, 1, 0, 1f)
     }
 
     override fun onCleared() {
         super.onCleared()
-
         computerJob?.cancel()
         errorBlinkJob?.cancel()
-
         soundPool.release()
     }
 }

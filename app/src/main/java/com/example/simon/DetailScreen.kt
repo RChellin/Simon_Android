@@ -37,7 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlin.collections.joinToString
 
-
+//titolo schermata dettaglio
 @Composable
 fun DetailTitle(
     titleFontSize: TextUnit,
@@ -58,7 +58,7 @@ fun DetailTitle(
         )
 
         Spacer(modifier = Modifier.height(smallSpacing))
-
+        //linea decorativa sotto al titolo
         Box(
             modifier = Modifier
                 .fillMaxWidth(0.25f)
@@ -70,7 +70,7 @@ fun DetailTitle(
         )
     }
 }
-
+//sezione punteggio
 @Composable
 fun ScoreSection(
     score: Int,
@@ -91,7 +91,7 @@ fun ScoreSection(
         )
 
         Spacer(modifier = Modifier.height(spacing))
-
+        //quadrato che evidenzia il punteggio della partita
         Box(
             modifier = Modifier
                 .size(scoreBoxSize)
@@ -110,6 +110,7 @@ fun ScoreSection(
         }
     }
 }
+//sezione sequenza
 @Composable
 fun SequenceSection(
     sequence: List<String>,
@@ -119,6 +120,7 @@ fun SequenceSection(
     shape: RoundedCornerShape,
     maxHeight: Dp
 ) {
+    //permette di scorrere la sequenza quando è troppo lunga
     val sequenceScrollState = rememberScrollState()
 
     Column(
@@ -151,13 +153,14 @@ fun SequenceSection(
         }
     }
 }
+//*****schermata dettaglio partita*****
 @Composable
 fun DetailScreen(
     gameId: Int,
     gameListViewModel: GameListViewModel
 ) {
     val gameResultState = remember { mutableStateOf<GameResult?>(null) }
-
+    //carica dal database la partita corrispondente all'id ricevuto
     LaunchedEffect(gameId) {
         gameResultState.value = gameListViewModel.getGameById(gameId)
     }
@@ -168,7 +171,7 @@ fun DetailScreen(
         Text(text = stringResource(R.string.caricamento))
         return
     }
-
+    //controllo orientamento
     val isPortrait = LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT
 
     val spacing = 12.dp
@@ -182,22 +185,11 @@ fun DetailScreen(
     ) {
         val screenWidth = maxWidth
         val screenHeight = maxHeight
-
-        val scoreBoxSize =
-            if (isPortrait) screenWidth * 0.26f
-            else screenHeight * 0.28f
-
-        val titleFontSize =
-            if (isPortrait) 26.sp
-            else 24.sp
-
-        val scoreFontSize =
-            if (isPortrait) 42.sp
-            else 38.sp
-
-        val sequenceFontSize =
-            if (isPortrait) 22.sp
-            else 20.sp
+        // dimensioni che cambiano in relazione allo spazio disponibile
+        val scoreBoxSize = if (isPortrait) screenWidth * 0.26f else screenHeight * 0.28f
+        val titleFontSize = if (isPortrait) 26.sp else 24.sp
+        val scoreFontSize = if (isPortrait) 42.sp else 38.sp
+        val sequenceFontSize = if (isPortrait) 22.sp else 20.sp
 
         if (isPortrait) {
             Column(
