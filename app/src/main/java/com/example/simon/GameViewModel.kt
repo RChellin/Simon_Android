@@ -13,6 +13,8 @@ import kotlinx.coroutines.launch
 import kotlin.random.Random
 import android.media.AudioAttributes
 import android.media.SoundPool
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.SavedStateHandle
 
 enum class GameState {
@@ -43,8 +45,8 @@ class GameViewModel(
         GameState.valueOf(savedStateHandle["game_state"] ?: GameState.IDLE.name)
     )
 
-    var errorMessage by mutableStateOf<String?>(
-        savedStateHandle["error_message"]
+    var showErrorMessage by mutableStateOf(
+        savedStateHandle["show_error_message"] ?: false
     )
     var activeColor by mutableStateOf<String?>(null)
 
@@ -74,7 +76,8 @@ class GameViewModel(
     private val soundIds = mutableMapOf<String, Int>()
 
     init {
-        val audioAttributes = AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_GAME).setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build()
+        val audioAttributes = AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_GAME)
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build()
 
         soundPool = SoundPool.Builder().setMaxStreams(6).setAudioAttributes(audioAttributes).build()
 
@@ -170,8 +173,8 @@ class GameViewModel(
             errorIndex = currentPlayerIndex
             saveErrorIndex()
 
-            errorMessage = "Sequenza errata!"
-            saveErrorMessage()
+            showErrorMessage = true
+            saveShowErrorMessage()
 
             gameState = GameState.GAME_OVER
             saveGameState()
@@ -342,8 +345,8 @@ class GameViewModel(
 
         activeColor = null
 
-        errorMessage = null
-        saveErrorMessage()
+        showErrorMessage = false
+        saveShowErrorMessage()
 
         errorIndex = -1
         saveErrorIndex()
@@ -382,12 +385,14 @@ class GameViewModel(
         savedStateHandle["max_correct_length"] = maxCorrectLength
     }
 
-    private fun saveErrorMessage() {
-        savedStateHandle["error_message"] = errorMessage
+    private fun saveShowErrorMessage() {
+        savedStateHandle["show_error_message"] = showErrorMessage
     }
+
     private fun saveErrorIndex() {
         savedStateHandle["error_index"] = errorIndex
     }
+
     fun isStartEnabled(): Boolean {
         return gameState == GameState.IDLE
     }
@@ -404,11 +409,12 @@ class GameViewModel(
         return gameState == GameState.PLAYER_TURN
     }
 
+    @Composable
     fun pauseButtonText(): String {
         return if (gameState == GameState.PAUSED) {
-            "Riprendi"
+            stringResource(R.string.riprendi)
         } else {
-            "Pausa"
+            stringResource(R.string.pausa)
         }
     }
 
@@ -438,6 +444,7 @@ class GameViewModel(
             1f
         )
     }
+
     private fun playErrorSound() {
         soundPool.play(
             soundIds["error"] ?: return,

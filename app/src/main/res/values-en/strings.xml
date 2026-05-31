@@ -3,9 +3,16 @@
     <string name="app_name">Simon</string>
     <string name="cancella">Delete</string>
     <string name="fine_partita">End Game</string>
-    <string name="recap_partite">Games recap</string>
+    <string name="recap_partite">GAMES RECAP</string>
     <string name="successione_vuota">Empty series</string>
     <string name="pausa">Pause</string>
     <string name="riprendi">Resume</string>
     <string name="gioca">Play</string>
+    <string name="caricamento">Loading…</string>
+    <string name="sequenza">Sequence</string>
+    <string name="dettaglio">GAME DETAIL</string>
+    <string name="punteggio">Score</string>
+    <string name="avvia">Start game</string>
+    <string name="seq_errata">Wrong sequence</string>
+
 </resources>

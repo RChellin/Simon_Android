@@ -2,9 +2,16 @@
     <string name="app_name" translatable="false">Simon</string>
     <string name="cancella">Cancella</string>
     <string name="fine_partita">Fine Partita</string>
-    <string name="recap_partite">Recap delle partite</string>
+    <string name="recap_partite">RECAP DELLE PARTITE</string>
     <string name="successione_vuota">Successione vuota</string>
     <string name="pausa">Pausa</string>
     <string name="riprendi">Riprendi</string>
     <string name="gioca">Gioca</string>
+    <string name="caricamento">Caricamento…</string>
+    <string name="sequenza">Sequenza</string>
+    <string name="dettaglio">DETTAGLIO PARTITA</string>
+    <string name="punteggio">Punteggio</string>
+    <string name="avvia">Avvia partita</string>
+    <string name="seq_errata">Sequenza errata</string>
+
 </resources>

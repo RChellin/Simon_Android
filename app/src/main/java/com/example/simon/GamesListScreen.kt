@@ -94,7 +94,7 @@ fun GameListScreen(
                     verticalArrangement = Arrangement.spacedBy(smallSpacing)
                 ) {
 
-                    items(gameResults.reversed()) { game ->
+                    items(gameResults) { game ->
 
                         Row(
                             modifier = Modifier
@@ -169,7 +169,7 @@ fun GameListScreen(
                     icon = {
                         Icon(
                             Icons.Filled.Gamepad,
-                            contentDescription = "Gioca"
+                            contentDescription = stringResource(R.string.gioca)
                         )
                     },
                     text = {

@@ -136,7 +136,7 @@ fun GameScreen(
             },
             enabled = viewModel.isStartEnabled()
         ) {
-            Text("Avvia partita")
+            Text(text = stringResource(R.string.avvia))
         }
     }
 
@@ -165,14 +165,12 @@ fun GameScreen(
 
     }
     @Composable
-    fun ErrorMessage(errorMessage: String?) {
-
-        errorMessage?.let {
-
+    fun ErrorMessage(showErrorMessage: Boolean) {
+        if (showErrorMessage) {
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = it,
+                text = stringResource(R.string.seq_errata),
                 color = Color.Red,
                 fontWeight = FontWeight.Bold
             )
@@ -226,7 +224,7 @@ fun GameScreen(
                     ) {
                         textBox()
                     }
-                    ErrorMessage(viewModel.errorMessage)
+                    ErrorMessage(viewModel.showErrorMessage)
                     Spacer(modifier = Modifier.height(spacing))
 
                     //BUTTONS cancella e fine partita
@@ -279,7 +277,7 @@ fun GameScreen(
                         textBox()
                     }
                 }
-                ErrorMessage(viewModel.errorMessage)
+                ErrorMessage(viewModel.showErrorMessage)
 
                 Spacer(modifier = Modifier.height(spacing))
 
